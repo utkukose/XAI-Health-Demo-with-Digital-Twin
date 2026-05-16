@@ -1,0 +1,1122 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>XAI Health Demo — Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f0f4f8;--surface:#fff;--surface2:#e8eef5;--primary:#1a3a5c;--accent:#0ea5c9;--accent2:#10b981;--warn:#f59e0b;--danger:#ef4444;--purple:#8b5cf6;--text:#1e293b;--text2:#475569;--text3:#94a3b8;--border:#cbd5e1;--radius:12px;--shadow:0 2px 16px rgba(26,58,92,.10)}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:15px;line-height:1.6;-webkit-font-smoothing:antialiased}
+header{background:var(--primary);padding:16px 28px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 2px 12px rgba(0,0,0,.18)}
+.hbrand{display:flex;align-items:center;gap:12px}
+.hlogo{width:36px;height:36px;background:var(--accent);border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:18px}
+.htitle{font-family:'DM Serif Display',serif;color:#fff;font-size:1.15rem}
+.hright{display:flex;align-items:center;gap:10px}
+.live-dot{width:8px;height:8px;background:var(--accent2);border-radius:50%;animation:blink 2s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+.hbtn{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);color:#fff;padding:6px 13px;border-radius:7px;font-family:'Nunito',sans-serif;font-size:.76rem;cursor:pointer;transition:all .2s}
+.hbtn:hover{background:rgba(255,255,255,.22)}
+.hbtn.dbtn{background:rgba(239,68,68,.2);border-color:rgba(239,68,68,.35);color:#fca5a5}
+.last-upd{font-size:.68rem;color:rgba(255,255,255,.4);margin-top:2px}
+.container{max-width:1400px;margin:0 auto;padding:22px 16px 56px}
+
+/* STATS */
+.stats-row{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:18px}
+.stat-card{background:var(--surface);border-radius:var(--radius);padding:16px;box-shadow:var(--shadow);border-top:3px solid var(--accent);text-align:center}
+.stat-val{font-family:'DM Serif Display',serif;font-size:1.9rem;color:var(--primary);line-height:1}
+.stat-lbl{font-size:.66rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--text2);margin-top:3px}
+
+/* COHORT */
+.cohort-section{background:var(--surface);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden;margin-bottom:18px}
+.cohort-head{background:var(--primary);padding:13px 18px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
+.cohort-head h2{font-family:'DM Serif Display',serif;color:#fff;font-size:.95rem}
+.cohort-hint{color:rgba(255,255,255,.45);font-size:.68rem;margin-top:2px}
+.cohort-ctrl{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.sp-btn{padding:4px 11px;border:1px solid rgba(255,255,255,.22);border-radius:100px;font-size:.7rem;cursor:pointer;background:rgba(255,255,255,.08);color:rgba(255,255,255,.78);font-family:'Nunito',sans-serif;transition:all .18s;font-weight:600}
+.sp-btn.active{background:var(--accent);border-color:var(--accent);color:#fff}
+.play-btn{width:30px;height:30px;border-radius:50%;background:var(--accent);border:none;color:#fff;font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.time-disp{color:rgba(255,255,255,.65);font-size:.74rem;min-width:76px;text-align:center}
+.cohort-tl{padding:8px 18px;background:var(--surface2);border-bottom:1px solid var(--border)}
+.tl-bar{height:5px;background:var(--border);border-radius:3px;overflow:hidden;margin-bottom:4px}
+.tl-fill{height:100%;background:linear-gradient(90deg,var(--accent2),var(--warn),var(--danger));border-radius:3px;transition:width .3s}
+.tl-marks{display:flex;justify-content:space-between}
+.tl-mark{font-size:.6rem;color:var(--text3)}
+.cohort-grid{padding:18px;display:flex;flex-wrap:wrap;gap:14px;min-height:140px;align-items:flex-start}
+.mini-twin{display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;padding:9px 7px;border-radius:10px;transition:all .2s;background:var(--surface2);border:2px solid transparent}
+.mini-twin:hover{background:#dbeafe;border-color:var(--accent);transform:translateY(-2px);box-shadow:0 4px 14px rgba(14,165,201,.18)}
+.mini-twin.selected{border-color:var(--primary);background:#eff6ff}
+.mini-sil{width:52px;height:92px}
+.mini-name{font-size:.65rem;font-weight:700;color:var(--primary);text-align:center;max-width:72px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mini-score{font-size:.62rem;font-weight:700;padding:1px 6px;border-radius:100px;margin-top:1px}
+.mini-age{font-size:.62rem;color:var(--text3)}
+.sl{background:rgba(16,185,129,.12);color:#059669}.sm{background:rgba(245,158,11,.12);color:#d97706}.sh{background:rgba(239,68,68,.12);color:#dc2626}
+.cohort-empty{color:var(--text3);font-size:.82rem;padding:36px;text-align:center;width:100%}
+
+/* CHARTS */
+.charts-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:18px}
+.chart-card{background:var(--surface);border-radius:var(--radius);padding:16px;box-shadow:var(--shadow)}
+.chart-title{font-size:.74rem;font-weight:700;color:var(--primary);margin-bottom:10px;text-transform:uppercase;letter-spacing:.04em}
+.bar-chart{display:flex;flex-direction:column;gap:6px}
+.bar-item{display:flex;align-items:center;gap:7px}
+.bar-lbl{font-size:.7rem;color:var(--text2);width:86px;flex-shrink:0}
+.bar-track{flex:1;height:8px;background:var(--surface2);border-radius:4px;overflow:hidden}
+.bar-fill{height:100%;border-radius:4px;transition:width .5s ease}
+.bar-cnt{font-size:.7rem;color:var(--text2);width:22px;text-align:right;flex-shrink:0}
+
+/* TABLE */
+.table-section{background:var(--surface);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden}
+.table-head-bar{background:var(--primary);padding:13px 18px;display:flex;align-items:center;justify-content:space-between}
+.table-head-bar h2{font-family:'DM Serif Display',serif;color:#fff;font-size:.95rem}
+.pcount{background:var(--accent);color:#fff;font-size:.7rem;font-weight:700;padding:2px 9px;border-radius:100px}
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:.75rem}
+thead tr{background:var(--surface2)}
+th{padding:9px 11px;text-align:left;font-size:.66rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--text2);white-space:nowrap}
+td{padding:8px 11px;border-top:1px solid var(--surface2);white-space:nowrap;cursor:pointer}
+tr:hover td{background:rgba(14,165,201,.06)}
+.rpill{display:inline-block;padding:1px 7px;border-radius:100px;font-size:.66rem;font-weight:700}
+.rl{background:rgba(16,185,129,.12);color:#059669}.rm{background:rgba(245,158,11,.12);color:#d97706}.rh{background:rgba(239,68,68,.12);color:#dc2626}
+.ts{font-size:.66rem;color:var(--text3)}
+.trend{font-size:.76rem;font-weight:700}.trup{color:var(--danger)}.trdn{color:var(--accent2)}.trfl{color:var(--text3)}
+/* Explanations */
+.score-tip{font-size:.66rem;color:var(--text2);margin-top:4px;line-height:1.4;text-align:center}
+.cohort-badge{background:rgba(14,165,201,.1);border:1px solid rgba(14,165,201,.2);border-radius:9px;padding:8px 14px;margin:0 18px 12px;font-size:.74rem;color:var(--text2);line-height:1.5}
+.cohort-badge strong{color:var(--primary)}
+.factor-tip{font-size:.68rem;color:var(--text3);font-style:italic;margin-top:2px;line-height:1.3}
+
+
+/* ── MODAL ───────────────────────────────────────────── */
+.modal-overlay{position:fixed;inset:0;background:rgba(15,34,56,.55);z-index:1000;display:none;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(4px)}
+.modal-overlay.open{display:flex}
+.modal{background:var(--surface);border-radius:18px;width:100%;max-width:860px;max-height:90vh;overflow-y:auto;box-shadow:0 24px 64px rgba(15,34,56,.35);position:relative}
+.modal-header{background:var(--primary);padding:18px 24px;border-radius:18px 18px 0 0;display:flex;align-items:center;justify-content:space-between}
+.modal-header h2{font-family:'DM Serif Display',serif;color:#fff;font-size:1.15rem}
+.modal-sub{color:rgba(255,255,255,.55);font-size:.74rem;margin-top:2px}
+.modal-close{width:32px;height:32px;border-radius:50%;background:rgba(255,255,255,.12);border:none;color:#fff;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:background .2s}
+.modal-close:hover{background:rgba(255,255,255,.25)}
+.modal-body{padding:22px 24px;display:grid;grid-template-columns:180px 1fr;gap:20px}
+.modal-sil-col{display:flex;flex-direction:column;align-items:center;gap:10px}
+.modal-sil-wrap{position:relative}
+#modalSvg{width:160px;height:280px}
+.modal-bio{font-family:'DM Serif Display',serif;font-size:2rem;color:var(--primary);text-align:center;line-height:1}
+.modal-bio-lbl{font-size:.68rem;color:var(--text3);text-align:center}
+.modal-status{font-size:.72rem;font-weight:700;padding:4px 13px;border-radius:100px;text-align:center}
+.modal-right{display:flex;flex-direction:column;gap:14px}
+.modal-scores{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px}
+.ms-card{background:var(--surface2);border-radius:10px;padding:12px 8px;text-align:center;border-top:3px solid var(--border)}
+.ms-val{font-family:'DM Serif Display',serif;font-size:1.5rem;color:var(--primary);line-height:1}
+.ms-lbl{font-size:.62rem;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--text2);margin:3px 0 1px}
+.ms-delta{font-size:.68rem;font-weight:700;padding:1px 6px;border-radius:100px}
+.du{background:rgba(239,68,68,.1);color:#dc2626}.dd{background:rgba(16,185,129,.1);color:#059669}.df{background:var(--surface);color:var(--text3)}
+
+/* Modal time controls */
+.modal-tc{background:var(--surface2);border-radius:10px;padding:12px 14px}
+.modal-tc-row{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:10px}
+.modal-tc-title{font-size:.76rem;font-weight:700;color:var(--primary)}
+.modal-speed-group{display:flex;gap:5px;align-items:center;flex-wrap:wrap}
+.msp-btn{padding:3px 10px;border:1.5px solid var(--border);border-radius:100px;font-size:.68rem;cursor:pointer;background:var(--surface);color:var(--text2);font-family:'Nunito',sans-serif;font-weight:600;transition:all .15s}
+.msp-btn.active{background:var(--primary);border-color:var(--primary);color:#fff}
+.mplay-btn{width:30px;height:30px;border-radius:50%;background:var(--primary);border:none;color:#fff;font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.mtl-points{display:flex;justify-content:space-between;margin-bottom:6px}
+.mtl-pt{display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;padding:2px 4px;border-radius:5px}
+.mtl-pt:hover{background:var(--border)}
+.mtl-pt.active .mtl-dot{background:var(--primary);transform:scale(1.4)}
+.mtl-pt.active .mtl-lbl{color:var(--primary);font-weight:700}
+.mtl-dot{width:9px;height:9px;border-radius:50%;background:var(--border);transition:all .25s}
+.mtl-lbl{font-size:.58rem;color:var(--text3);white-space:nowrap}
+.mtl-track{height:4px;background:var(--border);border-radius:2px;overflow:hidden;margin-bottom:4px}
+.mtl-fill{height:100%;background:linear-gradient(90deg,var(--accent2),var(--warn),var(--danger));transition:width .4s}
+.mtl-cur{font-size:.72rem;color:var(--text2);text-align:center}
+.mtl-cur strong{color:var(--primary)}
+
+/* Modal chart */
+.modal-chart-wrap{background:var(--surface2);border-radius:10px;padding:12px 14px}
+.modal-chart-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.modal-chart-ttl{font-size:.74rem;font-weight:700;color:var(--primary)}
+.modal-legend{display:flex;gap:10px}
+.mleg{display:flex;align-items:center;gap:3px;font-size:.66rem;color:var(--text2)}
+.mleg-dot{width:7px;height:7px;border-radius:50%}
+
+/* Modal factors */
+.modal-factors{background:var(--surface2);border-radius:10px;padding:12px 14px}
+.mf-title{font-size:.74rem;font-weight:700;color:var(--primary);margin-bottom:10px}
+.mf-row{display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid var(--border)}
+.mf-row:last-child{border-bottom:none}
+.mf-icon{font-size:14px;width:22px;text-align:center;flex-shrink:0}
+.mf-name{font-size:.74rem;color:var(--text);flex:1}
+.mf-bar-wrap{width:100px;height:6px;background:var(--border);border-radius:3px;overflow:hidden;flex-shrink:0}
+.mf-bar{height:100%;border-radius:3px}
+.mf-delta{font-size:.7rem;font-weight:700;width:40px;text-align:right;flex-shrink:0}
+.mf-dir{font-size:.68rem;color:var(--text3);width:14px;text-align:center}
+
+/* Modal info pills */
+.modal-info-grid{display:flex;flex-wrap:wrap;gap:6px}
+.info-pill{background:var(--surface2);border:1px solid var(--border);border-radius:7px;padding:4px 10px;font-size:.7rem;color:var(--text2)}
+.info-pill strong{color:var(--primary)}
+
+@media(max-width:700px){
+  .modal-body{grid-template-columns:1fr}
+  .modal-sil-col{flex-direction:row;flex-wrap:wrap;justify-content:center}
+  .stats-row{grid-template-columns:1fr 1fr 1fr}
+  .charts-row{grid-template-columns:1fr}
+  .modal-scores{grid-template-columns:1fr 1fr}
+}
+
+/* ── LOGIN ── */
+.login-overlay{position:fixed;inset:0;background:var(--primary);z-index:2000;display:flex;align-items:center;justify-content:center}
+.login-box{background:var(--surface);border-radius:18px;padding:40px 36px;width:100%;max-width:380px;box-shadow:0 24px 64px rgba(0,0,0,.35)}
+.login-logo{width:52px;height:52px;background:var(--accent);border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:24px;margin:0 auto 18px}
+.login-title{font-family:'DM Serif Display',serif;font-size:1.4rem;color:var(--primary);text-align:center;margin-bottom:4px}
+.login-sub{font-size:.78rem;color:var(--text3);text-align:center;margin-bottom:24px}
+.login-field{margin-bottom:14px}
+.login-field label{display:block;font-size:.76rem;font-weight:600;color:var(--text2);margin-bottom:5px}
+.login-field input{width:100%;padding:10px 14px;border:1.5px solid var(--border);border-radius:9px;font-family:'Nunito',sans-serif;font-size:.9rem;outline:none;transition:border-color .2s}
+.login-field input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(14,165,201,.12)}
+.login-btn{width:100%;padding:12px;background:var(--primary);color:#fff;border:none;border-radius:9px;font-family:'Nunito',sans-serif;font-size:.92rem;font-weight:700;cursor:pointer;transition:background .2s;margin-top:6px}
+.login-btn:hover{background:var(--primary-light,#2a5a8c)}
+.login-btn:disabled{opacity:.55;cursor:not-allowed}
+.login-error{background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.22);border-radius:8px;padding:9px 13px;font-size:.78rem;color:#dc2626;margin-top:10px;display:none;text-align:center}
+.login-attempts{font-size:.72rem;color:var(--text3);text-align:center;margin-top:8px}
+/* ── LOGOUT ── */
+.logout-btn{background:rgba(239,68,68,.15);border:1px solid rgba(239,68,68,.3);color:#fca5a5;padding:5px 12px;border-radius:7px;font-family:'Nunito',sans-serif;font-size:.74rem;cursor:pointer}
+.logout-btn:hover{background:rgba(239,68,68,.28)}
+/* ── DELETE ── */
+.del-btn{background:none;border:none;color:var(--text3);cursor:pointer;font-size:15px;padding:3px 6px;border-radius:5px;transition:all .15s;line-height:1}
+.del-btn:hover{background:rgba(239,68,68,.1);color:var(--danger)}
+.cb-col{width:32px;text-align:center}
+input[type=checkbox]{width:15px;height:15px;cursor:pointer;accent-color:var(--primary)}
+.bulk-bar{display:none;align-items:center;gap:10px;padding:8px 18px;background:rgba(26,58,92,.06);border-bottom:1px solid var(--border)}
+.bulk-bar.visible{display:flex}
+.bulk-count{font-size:.78rem;font-weight:600;color:var(--primary)}
+.bulk-del-btn{padding:5px 14px;background:var(--danger);color:#fff;border:none;border-radius:7px;font-family:'Nunito',sans-serif;font-size:.76rem;font-weight:700;cursor:pointer}
+/* ── CONFIRM DIALOG ── */
+.confirm-overlay{position:fixed;inset:0;background:rgba(15,34,56,.5);z-index:3000;display:none;align-items:center;justify-content:center;backdrop-filter:blur(3px)}
+.confirm-overlay.open{display:flex}
+.confirm-box{background:var(--surface);border-radius:14px;padding:28px 28px 22px;max-width:360px;width:100%;box-shadow:0 16px 48px rgba(0,0,0,.28)}
+.confirm-icon{font-size:32px;text-align:center;margin-bottom:12px}
+.confirm-title{font-family:'DM Serif Display',serif;font-size:1.1rem;color:var(--primary);text-align:center;margin-bottom:8px}
+.confirm-desc{font-size:.8rem;color:var(--text2);text-align:center;line-height:1.5;margin-bottom:20px}
+.confirm-btns{display:flex;gap:10px}
+.confirm-cancel{flex:1;padding:9px;background:var(--surface2);border:1.5px solid var(--border);border-radius:8px;font-family:'Nunito',sans-serif;font-size:.84rem;font-weight:600;cursor:pointer;color:var(--text)}
+.confirm-ok{flex:1;padding:9px;background:var(--danger);border:none;border-radius:8px;font-family:'Nunito',sans-serif;font-size:.84rem;font-weight:700;cursor:pointer;color:#fff}
+
+
+/* ── AUTHOR BAR ── */
+.author-bar{background:#f8fafc;border-top:1px solid #e2e8f0;padding:7px 18px;display:flex;align-items:center;gap:7px;font-size:.71rem;color:#0f172a;flex-wrap:wrap}
+.author-bar a{color:#0369a1;text-decoration:none;font-weight:700}
+.author-bar a:hover{color:#fff;text-decoration:underline}
+
+/* LANG TOGGLE */
+.lang-toggle{display:flex;gap:5px}
+.lang-btn{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);color:rgba(255,255,255,.7);border-radius:7px;padding:4px 12px;font-size:.75rem;cursor:pointer;font-family:'Nunito',sans-serif;transition:all .2s}
+.lang-btn.active{background:var(--accent);border-color:var(--accent);color:#fff}
+</style>
+</head>
+<body>
+
+
+<!-- ══ LOGIN OVERLAY ══ -->
+<div class="login-overlay" id="loginOverlay">
+  <div class="login-box">
+    <div class="login-logo">🔬</div>
+    <div class="login-title" data-tr="Admin Girişi" data-en="Admin Login">Admin Girişi</div>
+    <div class="login-sub"><span data-tr="XAI Health Demo — Sunucu Paneli" data-en="XAI Health Demo — Admin Panel">XAI Health Demo — Sunucu Paneli</span></div>
+    <div class="login-field">
+      <label>Kullanıcı Adı</label>
+      <input type="text" id="loginUser" placeholder="admin" autocomplete="username">
+    </div>
+    <div class="login-field">
+      <label>Şifre</label>
+      <input type="password" id="loginPass" placeholder="••••••••" autocomplete="current-password"
+             onkeydown="if(event.key==='Enter')doLogin()">
+    </div>
+    <button class="login-btn" id="loginBtn" onclick="doLogin()" data-tr="Giriş Yap" data-en="Sign In">Giriş Yap</button>
+    <div class="login-error" id="loginError"></div>
+    <div class="login-attempts" id="loginAttempts"></div>
+  </div>
+</div>
+
+<!-- ══ CONFIRM DIALOG ══ -->
+<div class="confirm-overlay" id="confirmOverlay">
+  <div class="confirm-box">
+    <div class="confirm-icon" id="confirmIcon">🗑️</div>
+    <div class="confirm-title" id="confirmTitle">Silmek istediğinize emin misiniz?</div>
+    <div class="confirm-desc" id="confirmDesc"></div>
+    <div class="confirm-btns">
+      <button class="confirm-cancel" onclick="closeConfirm()" data-tr="İptal" data-en="Cancel">İptal</button>
+      <button class="confirm-ok" id="confirmOk">Sil</button>
+    </div>
+  </div>
+</div>
+
+<header>
+  <div class="hbrand">
+    <div class="hlogo">🔬</div>
+    <div>
+      <div class="htitle"><span data-tr="XAI Health Demo — Sunucu Paneli" data-en="XAI Health Demo — Admin Panel">XAI Health Demo — Sunucu Paneli</span></div>
+      <div class="last-upd" id="lastUpd"><span id="updLbl" data-tr="Son güncelleme:" data-en="Last update:">Son güncelleme:</span> —</div>
+    </div>
+  </div>
+  <div class="hright">
+    <div class="live-dot"></div>
+    <div class="lang-toggle">
+      <button class="lang-btn active" id="lbTR" onclick="setAdminLang('tr')">TR</button>
+      <button class="lang-btn" id="lbEN" onclick="setAdminLang('en')">EN</button>
+    </div>
+    <button class="hbtn" onclick="loadData()">↻ <span data-tr="Yenile" data-en="Refresh">Yenile</span></button>
+    <button class="hbtn dbtn" onclick="clearData()">🗑 <span data-tr="Tümünü Temizle" data-en="Clear All">Tümünü Temizle</span></button>
+    <button class="logout-btn" onclick="doLogout()">⏻ <span data-tr="Çıkış" data-en="Logout">Çıkış</span></button>
+  </div>
+</header>
+<div class="author-bar">
+  <span>👤 <strong style="color:#0f172a">Prof. Dr. Utku Köse</strong></span>
+  <span style="color:#94a3b8">|</span>
+  <span class="aff-tr">SDU, Türkiye · UND, ABD · VelTech, Hindistan · UP, Meksika</span>
+  <span class="aff-en" style="display:none">SDU, Turkey · UND, USA · VelTech, India · UP, Mexico</span>
+  <span style="color:#94a3b8">|</span>
+  <a href="mailto:utkukose@sdu.edu.tr">utkukose@sdu.edu.tr</a>
+  <span style="color:#94a3b8">·</span>
+  <a href="mailto:utkukose@gmail.com">utkukose@gmail.com</a>
+  <span style="color:#94a3b8">·</span>
+  <a href="https://www.utkukose.com" target="_blank">www.utkukose.com</a>
+</div>
+
+
+<div class="container">
+
+  <div class="stats-row">
+    <div class="stat-card"><div class="stat-val" id="stT">0</div><div class="stat-lbl" data-tr="Katılımcı" data-en="Participants">Katılımcı</div></div>
+    <div class="stat-card" style="border-top-color:var(--danger)"><div class="stat-val" id="stH">0</div><div class="stat-lbl" data-tr="Yüksek KV Risk" data-en="High CV Risk">Yüksek KV Risk</div></div>
+    <div class="stat-card" style="border-top-color:var(--accent2)"><div class="stat-val" id="stA">—</div><div class="stat-lbl" data-tr="Ort. KV Skoru" data-en="Avg. CV Score">Ort. KV Skoru</div></div>
+    <div class="stat-card" style="border-top-color:var(--warn)"><div class="stat-val" id="stS">0</div><div class="stat-lbl" data-tr="Sigara Kullanan" data-en="Smokers">Sigara Kullanan</div></div>
+    <div class="stat-card" style="border-top-color:var(--purple)"><div class="stat-val" id="stM">0</div><div class="stat-lbl" data-tr="İlaç Kullanan" data-en="On Medication">İlaç Kullanan</div></div>
+  </div>
+
+  <div class="cohort-section">
+    <div class="cohort-head">
+      <div>
+        <h2>🧬 <span data-tr="Dijital İkiz Kohortu — Canlı Zaman Evrimi" data-en="Digital Twin Cohort — Live Time Evolution">Dijital İkiz Kohortu — Canlı Zaman Evrimi</span></h2>
+        <div class="cohort-hint">💡 <span data-tr="Bir silüete tıklayarak detaylı analiz yapabilirsiniz" data-en="Click a silhouette for detailed analysis">Bir silüete tıklayarak detaylı analiz yapabilirsiniz</span></div>
+      </div>
+      <div class="cohort-ctrl">
+        <span class="time-disp" id="timeDsp">Şimdi</span>
+        <button class="sp-btn active" onclick="setSpd('month',this)">1s=1ay</button>
+        <button class="sp-btn" onclick="setSpd('year',this)">1s=1yıl</button>
+        <button class="sp-btn" onclick="setSpd('decade',this)">1s=10yıl</button>
+        <button class="play-btn" id="playBtn" onclick="togglePlay()">▶</button>
+        <button class="sp-btn" onclick="resetTime()">↺</button>
+      </div>
+    </div>
+    <div class="cohort-tl">
+      <div class="tl-bar"><div class="tl-fill" id="tlFill" style="width:0%"></div></div>
+      <div class="tl-marks">
+        <span class="tl-mark">Şimdi</span><span class="tl-mark">1 Ay</span><span class="tl-mark">6 Ay</span>
+        <span class="tl-mark">1 Yıl</span><span class="tl-mark">3 Yıl</span><span class="tl-mark">5 Yıl</span><span class="tl-mark">10 Yıl</span>
+      </div>
+    </div>
+    <div class="cohort-badge">
+  💡 <strong><span data-tr="Dijital ikiz nasıl evrilir?" data-en="How does the digital twin evolve?">Dijital ikiz nasıl evrilir?</span></strong> Her katılımcının mevcut yaşam tarzı koşulları sabit tutularak matematiksel bir sağlık drift modeli uygulanır. Sigara, hareketsizlik ve stres gibi risk faktörleri yıllık bileşik artışa yol açarken, aktif yaşam tarzı ve koruyucu ilaçlar bu artışı yavaşlatır.
+</div>
+<div class="cohort-grid" id="cohortGrid">
+      <div class="cohort-empty">Henüz katılımcı yok — form doldurmalarını bekleyin.</div>
+    </div>
+  </div>
+
+  <div class="charts-row" id="chartsRow" style="display:none">
+    <div class="chart-card"><div class="chart-title" data-tr="KV Risk Dağılımı" data-en="CV Risk Distribution">KV Risk Dağılımı</div><div class="bar-chart" id="cvChart"></div></div>
+    <div class="chart-card"><div class="chart-title" data-tr="Aktivite Dağılımı" data-en="Activity Distribution">Aktivite Dağılımı</div><div class="bar-chart" id="actChart"></div></div>
+    <div class="chart-card"><div class="chart-title" data-tr="İlaç Kullanımı" data-en="Medication Use">İlaç Kullanımı</div><div class="bar-chart" id="medsChart"></div></div>
+  </div>
+
+  <div class="table-section">
+    <div class="table-head-bar">
+      <h2><span data-tr="Katılımcı Tablosu" data-en="Participant Table">Katılımcı Tablosu</span> <span style="font-size:.72rem;font-weight:400;opacity:.6" data-tr="(satıra tıkla → detay)" data-en="(click row → detail)">(satıra tıkla → detay)</span></h2>
+      <span class="pcount" id="pcnt">0 katılımcı</span>
+    </div>
+    <div class="bulk-bar" id="bulkBar">
+      <input type="checkbox" id="selectAll" onchange="toggleSelectAll(this)">
+      <span class="bulk-count" id="bulkCount">0 seçili</span>
+      <button class="bulk-del-btn" onclick="deleteSelected()">🗑 Seçilenleri Sil</button>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr>
+          <th class="cb-col"><input type="checkbox" id="selectAllHead" onchange="toggleSelectAll(this)"></th><th>#</th><th data-tr="Ad Soyad" data-en="Full Name">Ad Soyad</th><th data-tr="Saat" data-en="Time">Saat</th><th data-tr="Yaş" data-en="Age">Yaş</th><th>BMI</th>
+          <th>KV</th><th>Metabolik</th><th>Genel</th><th>Bağışıklık</th>
+          <th data-tr="Sigara" data-en="Smoking">Sigara</th><th data-tr="Aktivite" data-en="Activity">Aktivite</th><th data-tr="Beslenme" data-en="Diet">Beslenme</th><th data-tr="Stres" data-en="Stress">Stres</th>
+          <th data-tr="İlaçlar" data-en="Medications">İlaçlar</th><th data-tr="Kan Şekeri" data-en="Blood Sugar">Kan Şekeri</th><th data-tr="Kan Bas." data-en="BP">Kan Bas.</th>
+          <th data-tr="1Y KV" data-en="1Y CV">1Y KV</th><th data-tr="10Y KV" data-en="10Y CV">10Y KV</th><th></th>
+        </tr></thead>
+        <tbody id="tbody"><tr><td colspan="18" style="text-align:center;color:var(--text3);padding:28px">Henüz katılımcı yok.</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+<!-- ══════════ MODAL ══════════ -->
+<div class="modal-overlay" id="modalOverlay" onclick="handleOverlayClick(event)">
+  <div class="modal" id="modal">
+    <div class="modal-header">
+      <div>
+        <h2 id="modalName">—</h2>
+        <div class="modal-sub" id="modalSub">—</div>
+      </div>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body">
+
+      <!-- SOL: Silüet -->
+      <div class="modal-sil-col">
+        <div class="modal-status" id="modalStatus">—</div>
+        <div class="modal-sil-wrap">
+          <svg id="modalSvg" viewBox="0 0 160 280" xmlns="http://www.w3.org/2000/svg">
+            <circle id="ms-head" cx="80" cy="30" r="22" fill="#e8eef5" stroke="#cbd5e1" stroke-width="1.5"/>
+            <ellipse id="ms-brain" cx="80" cy="26" rx="16" ry="12" fill="#e9d5ff" opacity=".5"/>
+            <rect id="ms-neck" x="72" y="50" width="16" height="14" rx="4" fill="#e8eef5" stroke="#cbd5e1" stroke-width="1"/>
+            <path id="ms-torso" d="M50,64 Q40,80 38,120 Q37,140 50,145 L110,145 Q123,140 122,120 Q120,80 110,64 Z" fill="#e8eef5" stroke="#cbd5e1" stroke-width="1.5"/>
+            <path id="ms-heart" d="M72,90 C72,85 67,82 64,86 C61,82 56,85 56,90 C56,95 64,103 64,103 C64,103 72,95 72,90 Z" fill="#fca5a5" opacity=".7"/>
+            <ellipse id="ms-lung-l" cx="57" cy="100" rx="8" ry="12" fill="#bfdbfe" opacity=".6"/>
+            <ellipse id="ms-lung-r" cx="87" cy="100" rx="8" ry="12" fill="#bfdbfe" opacity=".6"/>
+            <ellipse id="ms-liver" cx="76" cy="120" rx="14" ry="8" fill="#fed7aa" opacity=".6"/>
+            <ellipse id="ms-gut" cx="72" cy="135" rx="12" ry="7" fill="#d9f99d" opacity=".5"/>
+            <path id="ms-arm-l" d="M50,70 Q30,90 28,130" stroke="#e8eef5" stroke-width="18" stroke-linecap="round" fill="none"/>
+            <path id="ms-arm-r" d="M110,70 Q130,90 132,130" stroke="#e8eef5" stroke-width="18" stroke-linecap="round" fill="none"/>
+            <path id="ms-leg-l" d="M62,145 Q58,185 55,225" stroke="#e8eef5" stroke-width="20" stroke-linecap="round" fill="none"/>
+            <path id="ms-leg-r" d="M98,145 Q102,185 105,225" stroke="#e8eef5" stroke-width="20" stroke-linecap="round" fill="none"/>
+            <ellipse id="ms-belly" cx="74" cy="130" rx="18" ry="10" fill="none" stroke="none" opacity="0"/>
+            <circle id="ms-pulse1" cx="64" cy="91" r="10" fill="none" stroke="#ef4444" stroke-width="1.5" opacity="0"/>
+            <circle id="ms-pulse2" cx="64" cy="91" r="16" fill="none" stroke="#ef4444" stroke-width="1" opacity="0"/>
+          </svg>
+        </div>
+        <div class="modal-bio" id="modalBioAge">—</div>
+        <div class="modal-bio-lbl" data-tr="Biyolojik Yaş" data-en="Biological Age">Biyolojik Yaş</div>
+        <div style="font-size:.7rem;color:var(--text3);text-align:center;margin-top:2px" id="modalTimeLabel">Şimdi</div>
+        <!-- Kişi bilgileri -->
+        <div class="modal-info-grid" id="modalInfoGrid" style="margin-top:6px;justify-content:center"></div>
+      </div>
+
+      <!-- SAĞ: Detaylar -->
+      <div class="modal-right">
+
+        <!-- Skor kartları -->
+        <div class="modal-scores" id="modalScores"></div>
+
+        <!-- Zaman kontrolü -->
+        <div class="modal-tc">
+          <div class="modal-tc-row">
+            <span class="modal-tc-title" data-tr="⏱ Zaman Kontrolü" data-en="⏱ Time Control">⏱ Zaman Kontrolü</span>
+            <div class="modal-speed-group">
+              <button class="msp-btn active" onclick="setModalSpeed('month',this)">1s=1ay</button>
+              <button class="msp-btn" onclick="setModalSpeed('year',this)">1s=1yıl</button>
+              <button class="msp-btn" onclick="setModalSpeed('decade',this)">1s=10yıl</button>
+              <button class="mplay-btn" id="mplayBtn" onclick="toggleModalPlay()">▶</button>
+              <button class="msp-btn" onclick="resetModalTime()">↺</button>
+            </div>
+          </div>
+          <div class="mtl-points" id="mtlPoints"></div>
+          <div class="mtl-track"><div class="mtl-fill" id="mtlFill" style="width:0%"></div></div>
+          <div class="mtl-cur" id="mtlCur"></div>
+        </div>
+
+        <!-- Risk eğrisi -->
+        <div class="modal-chart-wrap">
+          <div class="modal-chart-head">
+            <span class="modal-chart-ttl" data-tr="Risk Eğrisi (0 → 10 Yıl)" data-en="Risk Curve (0 → 10 Years)">Risk Eğrisi (0 → 10 Yıl)</span>
+            <div class="modal-legend">
+              <div class="mleg"><div class="mleg-dot" style="background:#ef4444"></div>KV</div>
+              <div class="mleg"><div class="mleg-dot" style="background:#f59e0b"></div>Met</div>
+              <div class="mleg"><div class="mleg-dot" style="background:#0ea5c9"></div>Genel</div>
+            </div>
+          </div>
+          <canvas id="modalChart" style="width:100%;height:150px"></canvas>
+        </div>
+
+        <!-- XAI Faktörler -->
+        <div class="modal-factors">
+          <div class="mf-title" data-tr="XAI Faktör Analizi — KV Risk" data-en="XAI Factor Analysis — CV Risk">XAI Faktör Analizi — KV Risk</div>
+          <div id="modalFactors"></div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ─────────────────────────────────────────────────────────
+// SCORING ENGINE
+// ─────────────────────────────────────────────────────────
+function baseScores(p){
+  const age=parseInt(p.age)||40,h=parseFloat(p.height)||170,w=parseFloat(p.weight)||70;
+  const bmi=w/((h/100)**2);
+  const bmiS=bmi<18.5?.35:bmi<25?0:bmi<30?.3:bmi<35?.6:.9;
+  const sm=parseFloat(p.smoking||0),al=parseFloat(p.alcohol||0),act=parseFloat(p.activity||0);
+  const diet=parseFloat(p.diet||0.5),st=parseFloat(p.stress||0),mo=parseFloat(p.mood||0),soc=parseFloat(p.social||1);
+  const sl=parseFloat(p.sleep||1),sit=parseFloat(p.sitting||0),wat=parseFloat(p.water||0.5),steps=parseFloat(p.steps||0.5);
+  const bpS={normal:0,high:.75,low:.2,unknown:.12}[p.bp]||0;
+  const cholS={normal:0,high:.6,unknown:.1}[p.chol]||0;
+  const glS={normal:0,prediabetes:.5,diabetes:.85,unknown:.1}[p.glucose]||0;
+  const hxS={none:0,cardio:.55,metabolic:.45,respiratory:.3,other:.25}[p.hx]||0;
+  const ageS=age<25?0:age<35?.1:age<45?.22:age<55?.38:age<65?.55:.72;
+  const meds=p.meds||[];
+  let mc=0,mm=0,mg=0;
+  if(meds.includes('bp'))mc-=.15;
+  if(meds.includes('betablocker'))mc-=.12;
+  if(meds.includes('statin'))mc-=.18;
+  if(meds.includes('aspirin'))mc-=.08;
+  if(meds.includes('metformin'))mm-=.2;
+  if(meds.includes('insulin'))mm-=.1;
+  if(meds.includes('thyroid'))mm-=.1;
+  if(meds.includes('anticoag'))mc-=.1;
+  if(meds.includes('psych'))mg+=.1;
+  if(meds.includes('nsaid')){mc+=.08;mg+=.05;}
+  if(meds.includes('biologic'))mg-=.08;
+  if(meds.includes('inhaler'))mg-=.05;
+  if(meds.includes('vitamins')){mg-=.08;mm-=.05;}
+  const famhx=p.famhx||[];
+  const famS=(famhx.includes('heart')?.28:0)+(famhx.includes('diabetes')?.22:0)+(famhx.includes('cancer')?.12:0)+(famhx.includes('hypertension')?.18:0)+(famhx.includes('stroke')?.2:0);
+  const cv=Math.max(3,Math.min(99,Math.round(ageS*16+bpS*20+sm*22+bmiS*10+al*7+(1-act)*9+(1-diet)*6+(1-steps)*4+cholS*12+famS*8+hxS*6+sit*4+(1-soc)*3+mc*20)));
+  const met=Math.max(3,Math.min(99,Math.round(bmiS*22+glS*20+ageS*8+(1-act)*12+(1-diet)*10+st*7+(sl<0.5?6:0)+famS*7+hxS*8+(1-steps)*5+(1-wat)*4+mm*20)));
+  const gen=Math.max(3,Math.min(99,Math.round(st*18+mo*14+(1-soc)*10+(1-act)*10+(sl<0.5?8:0)+sm*8+al*5+sit*5+(1-wat)*4+(1-diet)*5+mg*20)));
+  const imm=Math.max(3,Math.min(99,Math.round(st*14+mo*10+(sl<0.5?8:0)+sm*10+al*6+(1-diet)*8+(1-soc)*6+(1-wat)*5+ageS*8)));
+  const factors=[
+    {key:'smoking',icon:'🚬',delta:Math.round(sm*22),pos:sm>0},
+    {key:'bp',icon:'💓',delta:Math.round(bpS*20),pos:bpS>0},
+    {key:'glucose',icon:'🩸',delta:Math.round(glS*20),pos:glS>0},
+    {key:'chol',icon:'🧪',delta:Math.round(cholS*12),pos:cholS>0},
+    {key:'bmi',icon:'⚖️',delta:Math.round(bmiS*10),pos:bmiS>0.2},
+    {key:'age',icon:'🎂',delta:Math.round(ageS*16),pos:true},
+    {key:'activity',icon:'🏃',delta:Math.round(act*9),pos:false},
+    {key:'diet',icon:'🥗',delta:Math.round(diet*6),pos:false},
+    {key:'stress',icon:'😤',delta:Math.round(st*18),pos:st>0.2},
+    {key:'family',icon:'🧬',delta:Math.round(famS*8),pos:famS>0},
+    {key:'sitting',icon:'💺',delta:Math.round(sit*4),pos:sit>0.2},
+    {key:'water',icon:'💧',delta:Math.round(wat*4),pos:false},
+  ];
+  return{cv,met,gen,imm,bmi:bmi.toFixed(1),factors,ageS,sm,al,act,diet,st,soc};
+}
+
+function atTime(p,d){
+  const b=baseScores(p);
+  const y=d/365;
+  const cvD=((b.sm*4.5+(1-b.act)*3+(1-b.diet)*2.5+b.al*2+(1-b.soc)*1.5)*y*(1-b.cv/110));
+  const metD=((1-b.diet)*3.5+(1-b.act)*3.5+b.st*2+b.al*1.5)*y*(1-b.met/110);
+  const genD=(b.st*3.5+(parseFloat(p.mood||0))*3+(1-b.soc)*2+(1-b.act)*2)*y*(1-b.gen/110);
+  const immD=(b.st*2+(parseFloat(p.mood||0))*2+b.sm*2+b.al*1.5+(1-b.diet)*2)*y*(1-b.imm/110);
+  return{
+    cv:Math.max(3,Math.min(99,Math.round(b.cv+cvD))),
+    met:Math.max(3,Math.min(99,Math.round(b.met+metD))),
+    gen:Math.max(3,Math.min(99,Math.round(b.gen+genD))),
+    imm:Math.max(3,Math.min(99,Math.round(b.imm+immD))),
+  };
+}
+
+function proj10(p){
+  const b=baseScores(p);
+  const d=((b.sm*4.5+(1-b.act)*3+(1-b.diet)*2.5+b.al*2+(1-b.soc)*1.5)*10*(1-b.cv/110));
+  return Math.max(3,Math.min(99,Math.round(b.cv+d)));
+}
+
+// ─────────────────────────────────────────────────────────
+// MINI SILHOUETTE SVG
+// ─────────────────────────────────────────────────────────
+function miniSvg(cv,met,gen,imm){
+  const avg=(cv+met+gen)/3;
+  const bc=avg<35?'#e0f2fe':avg<55?'#fef9c3':avg<70?'#fee2e2':'#fecaca';
+  const sc=avg<35?'#7dd3fc':avg<55?'#fde047':avg<70?'#fca5a5':'#f87171';
+  const hc=cv<30?'#86efac':cv<55?'#fca5a5':'#f87171';
+  const lc=met<30?'#86efac':met<55?'#fed7aa':'#f97316';
+  const brc=gen<30?'#e9d5ff':gen<55?'#c4b5fd':'#a78bfa';
+  const luc=imm<30?'#bfdbfe':imm<55?'#93c5fd':'#60a5fa';
+  return `<svg viewBox="0 0 52 92" xmlns="http://www.w3.org/2000/svg" width="52" height="92">
+    <circle cx="26" cy="10" r="8.5" fill="${bc}" stroke="${sc}" stroke-width="1.2"/>
+    <ellipse cx="26" cy="8" rx="6.5" ry="4.5" fill="${brc}" opacity=".55"/>
+    <rect x="22" y="18" width="8" height="6" rx="2" fill="${bc}" stroke="${sc}" stroke-width=".8"/>
+    <path d="M14,24 Q10,32 9,44 Q8.5,52 14,54 L38,54 Q43.5,52 43,44 Q42,32 38,24 Z" fill="${bc}" stroke="${sc}" stroke-width="1.2"/>
+    <path d="M22,31 C22,29 19.5,27.5 18,30 C16.5,27.5 14,29 14,31 C14,34 18,38 18,38 C18,38 22,34 22,31 Z" fill="${hc}" opacity=".78"/>
+    <ellipse cx="16" cy="37" rx="3.5" ry="5.5" fill="${luc}" opacity=".62"/>
+    <ellipse cx="31" cy="37" rx="3.5" ry="5.5" fill="${luc}" opacity=".62"/>
+    <ellipse cx="25" cy="46" rx="7" ry="4" fill="${lc}" opacity=".62"/>
+    <path d="M14,27 Q5,35 4,50" stroke="${bc}" stroke-width="8" stroke-linecap="round" fill="none"/>
+    <path d="M38,27 Q47,35 48,50" stroke="${bc}" stroke-width="8" stroke-linecap="round" fill="none"/>
+    <path d="M20,54 Q18,70 17,86" stroke="${bc}" stroke-width="8.5" stroke-linecap="round" fill="none"/>
+    <path d="M32,54 Q34,70 35,86" stroke="${bc}" stroke-width="8.5" stroke-linecap="round" fill="none"/>
+    ${cv>55?`<circle cx="18" cy="31" r="5" fill="none" stroke="${hc}" stroke-width="1.2" opacity=".65"/>`:``}
+    ${met>62?`<ellipse cx="25" cy="50" rx="9" ry="4" fill="rgba(249,115,22,.22)" stroke="#f97316" stroke-width="1"/>`:``}
+  </svg>`;
+}
+
+// ─────────────────────────────────────────────────────────
+// COHORT ANIMATION
+// ─────────────────────────────────────────────────────────
+const SPEEDS={month:30,year:365,decade:3650};
+let days=0,playing=false,speedKey='month',timer=null;
+
+function setSpd(key,btn){
+  speedKey=key;
+  document.querySelectorAll('.sp-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+}
+function togglePlay(){
+  playing=!playing;
+  document.getElementById('playBtn').textContent=playing?'⏸':'▶';
+  if(playing)tick();else clearTimeout(timer);
+}
+function tick(){
+  if(!playing)return;
+  days+=SPEEDS[speedKey]/30;
+  if(days>3650){days=3650;playing=false;document.getElementById('playBtn').textContent='▶';}
+  renderCohort();
+  timer=setTimeout(tick,33);
+}
+function resetTime(){
+  days=0;playing=false;
+  document.getElementById('playBtn').textContent='▶';
+  clearTimeout(timer);
+  renderCohort();
+}
+
+function renderCohort(){
+  const g=document.getElementById('cohortGrid');
+  if(!allData.length){g.innerHTML=adminLang==='tr'?'<div class="cohort-empty">Henüz katılımcı yok — form doldurmalarını bekleyin.</div>':'<div class="cohort-empty">No participants yet — waiting for form submissions.</div>';return;}
+  const pct=Math.min(days/3650*100,100);
+  document.getElementById('tlFill').style.width=pct+'%';
+  let lbl=adminLang==='tr'?'Şimdi':'Now';
+  if(days>=365)lbl=adminLang==='tr'?`${(days/365).toFixed(1)} yıl`:`${(days/365).toFixed(1)} yrs`;
+  else if(days>=30)lbl=adminLang==='tr'?`${Math.round(days/30)} ay`:`${Math.round(days/30)} mo`;
+  else if(days>0)lbl=adminLang==='tr'?`${Math.round(days)} gün`:`${Math.round(days)} days`;
+  document.getElementById('timeDsp').textContent=lbl;
+
+  g.innerHTML=allData.map((p,i)=>{
+    const s=atTime(p,days);
+    const b=baseScores(p);
+    const bioAge=Math.round((parseInt(p.age)||40)+(days/365)*(0.5+(s.cv+s.met)/120));
+    const avg=(s.cv+s.met+s.gen)/3;
+    const emoji=avg<25?'😊':avg<40?'🙂':avg<58?'😐':avg<75?'😟':'😰';
+    const rc=v=>v<25?'sl':v<55?'sm':'sh';
+    return`<div class="mini-twin" onclick="openModal(${i})" title="Detay için tıkla">
+      <div class="mini-sil">${miniSvg(s.cv,s.met,s.gen,s.imm||b.imm)}</div>
+      <div class="mini-name">${p.name}</div>
+      <span class="mini-score ${rc(s.cv)}">KV ${s.cv}</span>
+      <div class="mini-age">${emoji} Bio: ${bioAge}</div>
+    </div>`;
+  }).join('');
+}
+
+// ─────────────────────────────────────────────────────────
+// MODAL
+// ─────────────────────────────────────────────────────────
+const MTL=[
+  {k:'now',tr:'Şimdi',en:'Now',days:0},{k:'1m',tr:'1 Ay',en:'1 Mo',days:30},{k:'3m',tr:'3 Ay',en:'3 Mo',days:90},
+  {k:'6m',tr:'6 Ay',en:'6 Mo',days:180},{k:'1y',tr:'1 Yıl',en:'1 Yr',days:365},{k:'3y',tr:'3 Yıl',en:'3 Yrs',days:1095},
+  {k:'5y',tr:'5 Yıl',en:'5 Yrs',days:1825},{k:'10y',tr:'10 Yıl',en:'10 Yrs',days:3650},
+];
+let modalP=null,mDays=0,mPlaying=false,mSpeedKey='month',mTimer=null,mPulsePhase=0;
+
+function openModal(idx){
+  modalP=allData[idx];
+  mDays=0;mPlaying=false;
+  document.getElementById('mplayBtn').textContent='▶';
+  buildMtlPoints();
+  renderModal();
+  document.getElementById('modalOverlay').classList.add('open');
+  document.body.style.overflow='hidden';
+  drawModalChart();
+}
+function closeModal(){
+  document.getElementById('modalOverlay').classList.remove('open');
+  document.body.style.overflow='';
+  mPlaying=false;clearTimeout(mTimer);
+}
+function handleOverlayClick(e){if(e.target===document.getElementById('modalOverlay'))closeModal();}
+
+function buildMtlPoints(){
+  document.getElementById('mtlPoints').innerHTML=MTL.map((tp,i)=>`
+    <div class="mtl-pt" id="mtp-${i}" onclick="jumpModalTo(${i})">
+      <div class="mtl-dot"></div>
+      <span class="mtl-lbl">${tp[adminLang]||tp.tr}</span>
+    </div>`).join('');
+  highlightMtl();
+}
+function highlightMtl(){
+  const cur=MTL.reduce((b,tp,i)=>Math.abs(tp.days-mDays)<Math.abs(MTL[b].days-mDays)?i:b,0);
+  document.querySelectorAll('.mtl-pt').forEach((el,i)=>el.classList.toggle('active',i===cur));
+}
+function jumpModalTo(i){mDays=MTL[i].days;highlightMtl();updateMtlFill();renderModal();drawModalChart();}
+function updateMtlFill(){document.getElementById('mtlFill').style.width=Math.min(mDays/3650*100,100)+'%';}
+
+function setModalSpeed(key,btn){
+  mSpeedKey=key;
+  document.querySelectorAll('.msp-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+}
+function toggleModalPlay(){
+  mPlaying=!mPlaying;
+  document.getElementById('mplayBtn').textContent=mPlaying?'⏸':'▶';
+  if(mPlaying)mTick();else clearTimeout(mTimer);
+}
+function mTick(){
+  if(!mPlaying)return;
+  mDays+=SPEEDS[mSpeedKey]/30;
+  if(mDays>3650){mDays=3650;mPlaying=false;document.getElementById('mplayBtn').textContent='▶';}
+  highlightMtl();updateMtlFill();renderModal();drawModalChart();
+  mTimer=setTimeout(mTick,33);
+}
+function resetModalTime(){mDays=0;mPlaying=false;document.getElementById('mplayBtn').textContent='▶';clearTimeout(mTimer);highlightMtl();updateMtlFill();renderModal();drawModalChart();}
+
+function renderModal(){
+  if(!modalP)return;
+  const p=modalP;
+  const b=baseScores(p);
+  const s=atTime(p,mDays);
+  const s0=b;
+  const bioAge=Math.round((parseInt(p.age)||40)+(mDays/365)*(0.5+(s.cv+s.met)/120));
+  const avg=(s.cv+s.met+s.gen)/3;
+  const yrs=(mDays/365).toFixed(1);
+
+  document.getElementById('modalName').textContent=p.name;
+  document.getElementById('modalSub').textContent=adminLang==='tr'?`Yaş: ${p.age} | BMI: ${b.bmi} | ${mDays<1?'Şimdi':yrs+' yıl sonra'}`:`Age: ${p.age} | BMI: ${b.bmi} | ${mDays<1?'Now':yrs+' years later'}`;
+  document.getElementById('modalBioAge').textContent=bioAge;
+  document.getElementById('modalTimeLabel').textContent=mDays<1?(adminLang==='tr'?'Şimdi':'Now'):(adminLang==='tr'?`${yrs} yıl sonra`:`${yrs} years later`);
+
+  // Status
+  let stTxt,stStyle;
+  const st_=adminLang==='tr';
+  if(avg<22){stTxt=st_?'✅ Sağlıklı':'✅ Healthy';stStyle='background:rgba(16,185,129,.18);color:#059669';}
+  else if(avg<40){stTxt=st_?'🟡 İyi':'🟡 Good';stStyle='background:rgba(16,185,129,.12);color:#10b981';}
+  else if(avg<58){stTxt=st_?'⚠️ Dikkatli':'⚠️ Caution';stStyle='background:rgba(245,158,11,.15);color:#d97706';}
+  else if(avg<75){stTxt=st_?'🔴 Riskli':'🔴 At Risk';stStyle='background:rgba(239,68,68,.12);color:#dc2626';}
+  else{stTxt=st_?'🚨 Kritik':'🚨 Critical';stStyle='background:rgba(239,68,68,.22);color:#b91c1c';}
+  const stEl=document.getElementById('modalStatus');
+  stEl.textContent=stTxt;stEl.style.cssText=stStyle+';padding:4px 13px;border-radius:100px;font-size:.72rem;font-weight:700;display:inline-block';
+
+  // Scores
+  const slbls=adminLang==='tr'?['KARDİYOVASKÜLER','METABOLİK','GENEL İYİLİK','BAĞIŞIKLIK']:['CARDIOVASCULAR','METABOLIC','GENERAL WELLNESS','IMMUNITY'];
+  const stips=adminLang==='tr'?
+    ['Kalp-damar hastalığı riski. Sigara, KB ve kolesterol başlıca etkenler.','Diyabet ve metabolik sendrom riski. BMI ve kan şekeri belirleyici.','Ruhsal ve sosyal iyilik hali. Stres, uyku ve sosyal bağlantıyla şekillenir.','Bağışıklık sistemi direnci. Stres, uyku ve beslenmeye en duyarlı boyut.']:
+    ['Cardiovascular disease risk. Smoking, BP and cholesterol are the top drivers.','Diabetes and metabolic syndrome risk. BMI and blood sugar are decisive.','Mental and social wellbeing. Shaped by stress, sleep and social connection.','Immune system resilience. Most sensitive to stress, sleep and diet.'];
+  const svals=[s.cv,s.met,s.gen,s.imm];
+  const s0vals=[s0.cv,s0.met,s0.gen,s0.imm];
+  const sbdrs=['#ef4444','#f59e0b','#0ea5c9','#8b5cf6'];
+  document.getElementById('modalScores').innerHTML=svals.map((v,i)=>{
+    const diff=v-s0vals[i];
+    const dc=diff>2?'du':diff<-2?'dd':'df';
+    const ds=diff>2?`+${diff}`:diff<-2?`${diff}`:'—';
+    const rc=v<25?'#10b981':v<55?'#f59e0b':'#ef4444';
+    return`<div class="ms-card" style="border-top-color:${sbdrs[i]}">
+      <div class="ms-lbl">${slbls[i]}</div>
+      <div class="ms-val" style="color:${rc}">${v}</div>
+      <span class="ms-delta ${dc}">${ds}</span>
+      <div class="score-tip">${stips[i]}</div>
+    </div>`;
+  }).join('');
+
+  // Silhouette
+  updateModalSil(s,bioAge);
+
+  // Timeline label
+  let tlbl='Şimdi';
+  if(mDays>=365)tlbl=`${(mDays/365).toFixed(1)} yıl`;
+  else if(mDays>=30)tlbl=`${Math.round(mDays/30)} ay`;
+  else if(mDays>0)tlbl=`${Math.round(mDays)} gün`;
+  document.getElementById('mtlCur').innerHTML=adminLang==='tr'?`<strong>${tlbl}</strong> — KV: ${s.cv} | Met: ${s.met} | Genel: ${s.gen} | Bağışıklık: ${s.imm}`:`<strong>${tlbl}</strong> — CV: ${s.cv} | Met: ${s.met} | General: ${s.gen} | Immunity: ${s.imm}`;
+
+  // Info pills
+  const smLbl=adminLang==='tr'?{'0':'Sigara: Yok','0.4':'Sigara: Bıraktım','0.7':'Sigara: Hafif','1':'Sigara: Yoğun'}:{'0':'Smoking: None','0.4':'Smoking: Former','0.7':'Smoking: Light','1':'Smoking: Heavy'};
+  const acLbl=adminLang==='tr'?{'0':'Aktivite: Hareketsiz','0.4':'Aktivite: Hafif','0.7':'Aktivite: Orta','1':'Aktivite: Aktif'}:{'0':'Activity: Sedentary','0.4':'Activity: Light','0.7':'Activity: Moderate','1':'Activity: Active'};
+  const bpLbl=adminLang==='tr'?{normal:'KB: Normal',high:'KB: Yüksek',low:'KB: Düşük',unknown:'KB: ?'}:{normal:'BP: Normal',high:'BP: High',low:'BP: Low',unknown:'BP: ?'};
+  const glLbl=adminLang==='tr'?{normal:'Kan Şekeri: Normal',prediabetes:'Pre-Diyabet',diabetes:'Diyabet',unknown:'Kan Şekeri: ?'}:{normal:'Blood Sugar: Normal',prediabetes:'Pre-Diabetes',diabetes:'Diabetes',unknown:'Blood Sugar: ?'};
+  const pills=[
+    smLbl[p.smoking]||'', acLbl[p.activity]||'',
+    bpLbl[p.bp]||'', glLbl[p.glucose]||'',
+    ...(p.meds||[]).filter(m=>m&&m!=='none').map(m=>m),
+    ...(p.famhx||[]).filter(m=>m&&m!=='none').map(m=>'Aile: '+m)
+  ].filter(Boolean);
+  document.getElementById('modalInfoGrid').innerHTML=pills.map(t=>`<span class="info-pill">${t}</span>`).join('');
+
+  // Factors
+  const fnamesTR={smoking:'Sigara',bp:'Kan basıncı',glucose:'Kan şekeri',chol:'Kolesterol',bmi:'BMI',age:'Yaş',activity:'Fiziksel aktivite',diet:'Beslenme',stress:'Stres',family:'Aile geçmişi',sitting:'Oturma süresi',water:'Su tüketimi'};
+  const fnamesEN={smoking:'Smoking',bp:'Blood Pressure',glucose:'Blood Sugar',chol:'Cholesterol',bmi:'BMI',age:'Age',activity:'Physical Activity',diet:'Diet',stress:'Stress',family:'Family History',sitting:'Sitting Time',water:'Water Intake'};
+  const fnames=adminLang==='tr'?fnamesTR:fnamesEN;
+  const maxD=Math.max(...b.factors.map(f=>f.delta),1);
+  const fexplTR={
+    smoking:'Endotel hasarı ve oksidatif stres yoluyla KV risk artışı.',
+    bp:'Kalp ve damar duvarlarına doğrudan baskı.',
+    glucose:'Kronik hiperglisemi damar sertliğine yol açar.',
+    chol:'Yüksek LDL plak birikimini artırır.',
+    bmi:'İnsülin direnci ve inflamasyon üzerinden etki eder.',
+    age:'Kümülatif damar hasarı — değiştirilemez faktör.',
+    activity:'Tüm boyutlarda en güçlü koruyucu faktör.',
+    diet:'Akdeniz diyeti inflamasyonu azaltır.',
+    stress:'Kortizol zinciri: kan şekeri → uyku → bağışıklık.',
+    family:'Genetik yatkınlık — diğer faktörlerle dengelenir.',
+    sitting:'Uzun hareketsizlik metabolik yavaşlamaya yol açar.',
+    water:'Metabolizma ve böbrek fonksiyonu için temel.',
+  };
+  const fexplEN={
+    smoking:'Endothelial damage and oxidative stress drive CV risk increase.',
+    bp:'High blood pressure applies direct load on heart and vessels.',
+    glucose:'Chronic hyperglycemia leads to vascular stiffness.',
+    chol:'High LDL raises plaque buildup risk.',
+    bmi:'Excess weight drives insulin resistance and inflammation.',
+    age:'Cumulative vascular damage — unmodifiable factor.',
+    activity:'The strongest protective factor across all dimensions.',
+    diet:'Mediterranean diet reduces inflammation.',
+    stress:'Cortisol chain: blood sugar → sleep → immunity.',
+    family:'Genetic predisposition — balanced by other factors.',
+    sitting:'Prolonged inactivity leads to metabolic slowdown.',
+    water:'Essential for metabolism and kidney function.',
+  };
+  const fexpl=adminLang==='tr'?fexplTR:fexplEN;
+  document.getElementById('modalFactors').innerHTML=b.factors.map(f=>`
+    <div class="mf-row" style="flex-wrap:wrap">
+      <span class="mf-icon">${f.icon}</span>
+      <span class="mf-name">${fnames[f.key]||f.key}</span>
+      <div class="mf-bar-wrap"><div class="mf-bar" style="width:${Math.round(f.delta/maxD*100)}%;background:${f.pos?'#ef4444':'#10b981'}"></div></div>
+      <span class="mf-delta" style="color:${f.pos?'#dc2626':'#059669'}">${f.pos?'+':'−'}${f.delta}</span>
+      <span class="mf-dir">${f.pos?'↑':'↓'}</span>
+      ${fexpl[f.key]?`<div class="factor-tip" style="width:100%;padding-left:30px">${fexpl[f.key]}</div>`:''}
+    </div>`).join('');
+}
+
+// Modal silhouette
+let mPulse=0;
+function updateModalSil(s,bioAge){
+  const avg=(s.cv+s.met+s.gen)/3;
+  const bc=avg<35?'#e0f2fe':avg<55?'#fef9c3':avg<70?'#fee2e2':'#fecaca';
+  const sc=avg<35?'#7dd3fc':avg<55?'#fde047':avg<70?'#fca5a5':'#f87171';
+  const hc=s.cv<30?'#86efac':s.cv<55?'#fca5a5':'#f87171';
+  const lc=s.met<30?'#86efac':s.met<55?'#fed7aa':'#f97316';
+  const brc=s.gen<30?'#e9d5ff':s.gen<55?'#c4b5fd':'#a78bfa';
+  const luc=s.imm<30?'#bfdbfe':s.imm<55?'#93c5fd':'#60a5fa';
+  const set=(id,fill,stroke,op)=>{const el=document.getElementById(id);if(!el)return;if(fill)el.setAttribute('fill',fill);if(stroke)el.setAttribute('stroke',stroke);if(op!==undefined)el.setAttribute('opacity',op);};
+  set('ms-torso',bc,sc);set('ms-head',bc,sc);
+  set('ms-heart',hc);set('ms-liver',lc);set('ms-brain',brc,.6);
+  set('ms-lung-l',luc,.7);set('ms-lung-r',luc,.7);
+  ['ms-arm-l','ms-arm-r','ms-leg-l','ms-leg-r'].forEach(id=>{const el=document.getElementById(id);if(el)el.setAttribute('stroke',bc);});
+  const belly=document.getElementById('ms-belly');
+  if(belly){if(s.met>55){belly.setAttribute('fill','rgba(251,146,60,0.3)');belly.setAttribute('stroke','#f97316');belly.setAttribute('stroke-width','1.5');belly.setAttribute('opacity','0.8');}else{belly.setAttribute('opacity','0');}}
+}
+
+// Modal chart
+function drawModalChart(){
+  if(!modalP)return;
+  const canvas=document.getElementById('modalChart');
+  const W=canvas.parentElement.clientWidth-28;const H=150;
+  canvas.width=W;canvas.height=H;
+  const ctx=canvas.getContext('2d');ctx.clearRect(0,0,W,H);
+  const pad={l:30,r:12,t:10,b:22};
+  const cw=W-pad.l-pad.r,ch=H-pad.t-pad.b;
+  const n=MTL.length;
+  const cvA=[],metA=[],genA=[];
+  MTL.forEach(tp=>{const s=atTime(modalP,tp.days);cvA.push(s.cv);metA.push(s.met);genA.push(s.gen);});
+  ctx.strokeStyle='rgba(203,213,225,.4)';ctx.lineWidth=1;
+  [0,25,50,75,100].forEach(y=>{const py=pad.t+ch*(1-y/100);ctx.beginPath();ctx.moveTo(pad.l,py);ctx.lineTo(pad.l+cw,py);ctx.stroke();ctx.fillStyle='#94a3b8';ctx.font='9px Nunito';ctx.textAlign='right';ctx.fillText(y,pad.l-3,py+3);});
+  MTL.forEach((tp,i)=>{const px=pad.l+(i/(n-1))*cw;ctx.fillStyle='#94a3b8';ctx.font='9px Nunito';ctx.textAlign='center';ctx.fillText(tp[adminLang]||tp.tr,px,H-4);});
+  // current marker
+  const curPct=mDays/MTL[n-1].days;
+  const curX=pad.l+curPct*cw;
+  ctx.strokeStyle='rgba(26,58,92,.2)';ctx.lineWidth=1.5;ctx.setLineDash([3,4]);
+  ctx.beginPath();ctx.moveTo(curX,pad.t);ctx.lineTo(curX,pad.t+ch);ctx.stroke();ctx.setLineDash([]);
+  function drawLine(arr,color){
+    ctx.beginPath();ctx.strokeStyle=color;ctx.lineWidth=2;ctx.lineJoin='round';
+    arr.forEach((v,i)=>{const px=pad.l+(i/(n-1))*cw,py=pad.t+ch*(1-v/100);i===0?ctx.moveTo(px,py):ctx.lineTo(px,py);});
+    ctx.stroke();
+    const ci=curPct*(n-1),fl=Math.floor(ci),ce=Math.min(fl+1,n-1),fr=ci-fl;
+    const cv2=arr[fl]+(arr[ce]-arr[fl])*fr;
+    const cx2=curX,cy2=pad.t+ch*(1-cv2/100);
+    ctx.beginPath();ctx.arc(cx2,cy2,4,0,Math.PI*2);ctx.fillStyle=color;ctx.fill();
+    ctx.strokeStyle='#fff';ctx.lineWidth=1.5;ctx.stroke();
+  }
+  drawLine(cvA,'#ef4444');drawLine(metA,'#f59e0b');drawLine(genA,'#0ea5c9');
+}
+
+// Pulse animation
+setInterval(()=>{
+  if(!mPlaying||!modalP)return;
+  const s=atTime(modalP,mDays);
+  if(s.cv>55){
+    mPulse+=0.15;
+    const p1=document.getElementById('ms-pulse1'),p2=document.getElementById('ms-pulse2');
+    if(p1){p1.setAttribute('opacity',Math.max(0,Math.sin(mPulse)*0.6+0.4).toFixed(2));}
+    if(p2){p2.setAttribute('opacity',Math.max(0,Math.sin(mPulse-1)*0.4+0.2).toFixed(2));}
+  }
+},33);
+
+// ─────────────────────────────────────────────────────────
+// CHARTS
+// ─────────────────────────────────────────────────────────
+function renderCharts(){
+  if(!allData.length){document.getElementById('chartsRow').style.display='none';return;}
+  document.getElementById('chartsRow').style.display='grid';
+  const d=allData,mx=v=>Math.max(v,1);
+  const lo=d.filter(p=>(p.cvScore||0)<25).length,me=d.filter(p=>(p.cvScore||0)>=25&&(p.cvScore||0)<55).length,hi=d.filter(p=>(p.cvScore||0)>=55).length;
+  const mc=mx(Math.max(lo,me,hi));
+  document.getElementById('cvChart').innerHTML=adminLang==='tr'?[['Düşük (<25)',lo,'#10b981'],['Orta (25-54)',me,'#f59e0b'],['Yüksek (55+)',hi,'#ef4444']]:[['Low (<25)',lo,'#10b981'],['Moderate (25-54)',me,'#f59e0b'],['High (55+)',hi,'#ef4444']].map(([l,c,col])=>`<div class="bar-item"><span class="bar-lbl">${l}</span><div class="bar-track"><div class="bar-fill" style="width:${Math.round(c/mc*100)}%;background:${col}"></div></div><span class="bar-cnt">${c}</span></div>`).join('');
+  const an=d.filter(p=>parseFloat(p.activity||0)<.35).length,al=d.filter(p=>parseFloat(p.activity||0)>=.35&&parseFloat(p.activity||0)<.65).length,aa=d.filter(p=>parseFloat(p.activity||0)>=.65).length;
+  const ma=mx(Math.max(an,al,aa));
+  document.getElementById('actChart').innerHTML=adminLang==='tr'?[['Hareketsiz',an,'#ef4444'],['Hafif/Orta',al,'#f59e0b'],['Aktif',aa,'#10b981']]:[['Sedentary',an,'#ef4444'],['Light/Mod.',al,'#f59e0b'],['Active',aa,'#10b981']].map(([l,c,col])=>`<div class="bar-item"><span class="bar-lbl">${l}</span><div class="bar-track"><div class="bar-fill" style="width:${Math.round(c/ma*100)}%;background:${col}"></div></div><span class="bar-cnt">${c}</span></div>`).join('');
+  const ml=adminLang==='tr'?[['Tansiyon','bp'],['Statin','statin'],['Metformin','metformin'],['Aspirin','aspirin'],['Psikiyatrik','psych'],['Vitamin','vitamins']]:[['BP Meds','bp'],['Statin','statin'],['Metformin','metformin'],['Aspirin','aspirin'],['Psychiatric','psych'],['Vitamins','vitamins']];
+  const mm=mx(Math.max(...ml.map(([,k])=>d.filter(p=>(p.meds||[]).includes(k)).length)));
+  document.getElementById('medsChart').innerHTML=ml.map(([l,k])=>{const c=d.filter(p=>(p.meds||[]).includes(k)).length;return`<div class="bar-item"><span class="bar-lbl">${l}</span><div class="bar-track"><div class="bar-fill" style="width:${Math.round(c/mm*100)}%;background:var(--purple)"></div></div><span class="bar-cnt">${c}</span></div>`;}).join('');
+}
+
+// ─────────────────────────────────────────────────────────
+// TABLE
+// ─────────────────────────────────────────────────────────
+const smLblMap={tr:{'0':'Yok','0.4':'Bıraktım','0.7':'Hafif','1':'Yoğun'},en:{'0':'None','0.4':'Former','0.7':'Light','1':'Heavy'}};
+const acLblMap={tr:{'0':'Hareketsiz','0.4':'Hafif','0.7':'Orta','1':'Aktif'},en:{'0':'Sedentary','0.4':'Light','0.7':'Moderate','1':'Active'}};
+const diLblMap={tr:{'0':'Kötü','0.5':'Orta','1':'İyi'},en:{'0':'Poor','0.5':'Mixed','1':'Good'}};
+const stLblMap={tr:{'0':'Düşük','0.5':'Orta','0.8':'Yüksek','1':'Kronik'},en:{'0':'Low','0.5':'Moderate','0.8':'High','1':'Chronic'}};
+const bpLblMap={tr:{normal:'Normal',high:'Yüksek',low:'Düşük',unknown:'?'},en:{normal:'Normal',high:'High',low:'Low',unknown:'?'}};
+const glLblMap={tr:{normal:'Normal',prediabetes:'Pre-DM',diabetes:'DM',unknown:'?'},en:{normal:'Normal',prediabetes:'Pre-DM',diabetes:'DM',unknown:'?'}};
+const smLbl=new Proxy({},{get:(_,k)=>smLblMap[adminLang][k]||'—'});
+const acLbl=new Proxy({},{get:(_,k)=>acLblMap[adminLang][k]||'—'});
+const diLbl=new Proxy({},{get:(_,k)=>diLblMap[adminLang][k]||'—'});
+const stLbl=new Proxy({},{get:(_,k)=>stLblMap[adminLang][k]||'—'});
+const bpLbl2=new Proxy({},{get:(_,k)=>bpLblMap[adminLang][k]||'—'});
+const glLbl2=new Proxy({},{get:(_,k)=>glLblMap[adminLang][k]||'—'});
+function rp(s){const c=s<25?'rl':s<55?'rm':'rh';return`<span class="rpill ${c}">${s}</span>`;}
+function ta(b,pv){const d=pv-b;return d>3?'<span class="trend trup">↑</span>':d<-3?'<span class="trend trdn">↓</span>':'<span class="trend trfl">→</span>';}
+
+function renderTable(){
+  const tb=document.getElementById('tbody');
+  document.getElementById('pcnt').textContent=adminLang==='tr'?`${allData.length} katılımcı`:`${allData.length} participants`;
+  if(!allData.length){tb.innerHTML='<tr><td colspan="18" style="text-align:center;color:var(--text3);padding:28px">Henüz katılımcı yok.</td></tr>';return;}
+  tb.innerHTML=allData.map((p,i)=>{
+    const cv=p.cvScore||0,met=p.metScore||0,gen=p.genScore||0,imm=p.immScore||0;
+    const p10=proj10(p);
+    const b=baseScores(p);
+    const p1=Math.max(3,Math.min(99,Math.round(b.cv+((b.sm*4.5+(1-b.act)*3+(1-b.diet)*2.5+b.al*2+(1-b.soc)*1.5)*1*(1-b.cv/110)))));
+    const mstr=(p.meds||[]).filter(m=>m&&m!=='none').slice(0,3).join(', ')||'—';
+    return`<tr data-idx="${i}">
+      <td class="cb-col" onclick="event.stopPropagation()"><input type="checkbox" class="row-cb" data-idx="${i}" onchange="updateBulkBar()"></td>
+      <td class="ts" onclick="openModal(${i})" style="cursor:pointer">${i+1}</td><td onclick="openModal(${i})" style="cursor:pointer"><strong>${p.name||'—'}</strong></td><td class="ts">${p.timestamp||'—'}</td>
+      <td>${p.age||'—'}</td><td>${p.bmi||b.bmi}</td>
+      <td>${rp(cv)}</td><td>${rp(met)}</td><td>${rp(gen)}</td><td>${rp(imm)}</td>
+      <td>${smLbl[p.smoking]||'—'}</td><td>${acLbl[p.activity]||'—'}</td><td>${diLbl[p.diet]||'—'}</td><td>${stLbl[p.stress]||'—'}</td>
+      <td style="max-width:110px;overflow:hidden;text-overflow:ellipsis" title="${mstr}">${mstr}</td>
+      <td>${glLbl2[p.glucose]||'—'}</td><td>${bpLbl2[p.bp]||'—'}</td>
+      <td>${rp(p1)} ${ta(cv,p1)}</td><td>${rp(p10)} ${ta(cv,p10)}</td>
+      <td onclick="event.stopPropagation()"><button class="del-btn" onclick="confirmDeleteOne(${i},'${(p.name||'?').replace(/'/g,'')}')" title="Sil">🗑</button></td>
+    </tr>`;}).join('');
+}
+
+// ─────────────────────────────────────────────────────────
+// STATS
+// ─────────────────────────────────────────────────────────
+function renderStats(){
+  const d=allData,n=d.length;
+  document.getElementById('stT').textContent=n;
+  document.getElementById('stH').textContent=d.filter(p=>(p.cvScore||0)>=55).length;
+  document.getElementById('stA').textContent=n?Math.round(d.reduce((s,p)=>s+(p.cvScore||0),0)/n):'—';
+  document.getElementById('stS').textContent=d.filter(p=>parseFloat(p.smoking||0)>0.3).length;
+  document.getElementById('stM').textContent=d.filter(p=>(p.meds||[]).some(m=>m&&m!=='none')).length;
+}
+
+// ─────────────────────────────────────────────────────────
+// DATA LOAD
+// ─────────────────────────────────────────────────────────
+// ─── AUTH ────────────────────────────────────────────────────────────
+let authToken = localStorage.getItem('xai_admin_token') || '';
+let allData = [];
+
+function authHeaders(){
+  return {'Content-Type':'application/json','Authorization':'Bearer '+authToken};
+}
+
+async function doLogin(){
+  const btn=document.getElementById('loginBtn');
+  const errEl=document.getElementById('loginError');
+  const user=document.getElementById('loginUser').value.trim();
+  const pass=document.getElementById('loginPass').value;
+  if(!user||!pass){showLoginError('Kullanıcı adı ve şifre gerekli.');return;}
+  btn.disabled=true;btn.textContent='Giriş yapılıyor...';
+  errEl.style.display='none';
+  try{
+    const res=await fetch('/api/auth/login',{method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({username:user,password:pass})});
+    if(res.ok){
+      const d=await res.json();
+      authToken=d.token;
+      localStorage.setItem('xai_admin_token',authToken);
+      document.getElementById('loginOverlay').style.display='none';
+      loadData();
+    } else {
+      const d=await res.json();
+      showLoginError(d.detail||'Giriş başarısız.');
+    }
+  } catch(e){showLoginError('Sunucuya bağlanılamadı.');}
+  btn.disabled=false;btn.textContent='Giriş Yap';
+}
+
+function showLoginError(msg){
+  const el=document.getElementById('loginError');
+  el.textContent=msg;el.style.display='block';
+}
+
+function doLogout(){
+  authToken='';
+  localStorage.removeItem('xai_admin_token');
+  document.getElementById('loginOverlay').style.display='flex';
+  document.getElementById('loginUser').value='';
+  document.getElementById('loginPass').value='';
+  document.getElementById('loginError').style.display='none';
+}
+
+async function checkAuth(){
+  if(!authToken)return false;
+  try{
+    const res=await fetch('/api/auth/verify',{headers:authHeaders()});
+    return res.ok;
+  }catch(e){return false;}
+}
+
+// ─── CONFIRM DIALOG ──────────────────────────────────────────────────
+let _confirmCallback=null;
+function showConfirm(title,desc,icon,cb){
+  document.getElementById('confirmTitle').textContent=title;
+  document.getElementById('confirmDesc').textContent=desc;
+  document.getElementById('confirmIcon').textContent=icon;
+  _confirmCallback=cb;
+  document.getElementById('confirmOverlay').classList.add('open');
+  document.getElementById('confirmOk').onclick=()=>{closeConfirm();cb();};
+}
+function closeConfirm(){document.getElementById('confirmOverlay').classList.remove('open');}
+
+// ─── DELETE ──────────────────────────────────────────────────────────
+function confirmDeleteOne(idx,name){
+  const isTR = adminLang==='tr';
+  showConfirm(
+    isTR?'Kaydı sil?':'Delete record?',
+    isTR?`"${name}" adlı katılımcının dijital ikiz verisi kalıcı olarak silinecek.`:`The digital twin data of "${name}" will be permanently deleted.`,
+    '🗑️',
+    ()=>deleteOne(idx)
+  );
+}
+
+async function deleteOne(idx){
+  try{
+    const res=await fetch(`/api/participants/${idx}`,{method:'DELETE',headers:authHeaders()});
+    if(res.status===401){doLogout();return;}
+    await loadData();
+  }catch(e){alert('Silme başarısız.');}
+}
+
+function updateBulkBar(){
+  const checked=[...document.querySelectorAll('.row-cb:checked')];
+  const bar=document.getElementById('bulkBar');
+  const cnt=document.getElementById('bulkCount');
+  bar.classList.toggle('visible',checked.length>0);
+  cnt.textContent=checked.length+' seçili';
+}
+
+function toggleSelectAll(cb){
+  document.querySelectorAll('.row-cb').forEach(el=>el.checked=cb.checked);
+  const other=document.getElementById(cb.id==='selectAll'?'selectAllHead':'selectAll');
+  if(other)other.checked=cb.checked;
+  updateBulkBar();
+}
+
+async function deleteSelected(){
+  const indices=[...document.querySelectorAll('.row-cb:checked')].map(el=>parseInt(el.dataset.idx));
+  if(!indices.length)return;
+  showConfirm(
+    adminLang==='tr'?`${indices.length} kaydı sil?`:`Delete ${indices.length} records?`,
+    adminLang==='tr'?`Seçilen ${indices.length} katılımcının dijital ikiz verisi kalıcı olarak silinecek.`:`The digital twin data of the selected ${indices.length} participants will be permanently deleted.`,
+    '⚠️',
+    async()=>{
+      try{
+        const res=await fetch('/api/participants/bulk',{method:'DELETE',
+          headers:authHeaders(),
+          body:JSON.stringify({indices})});
+        if(res.status===401){doLogout();return;}
+        await loadData();
+        document.getElementById('bulkBar').classList.remove('visible');
+      }catch(e){alert('Silme başarısız.');}
+    }
+  );
+}
+
+// ─── DATA LOAD ────────────────────────────────────────────────────────
+async function loadData(){
+  try{
+    const res=await fetch('/api/participants',{headers:authHeaders()});
+    if(res.status===401){doLogout();return;}
+    allData=await res.json();
+    renderStats();renderCohort();renderCharts();renderTable();
+    document.getElementById('lastUpd').textContent='Son güncelleme: '+new Date().toLocaleTimeString('tr-TR');
+  }catch(e){document.getElementById('lastUpd').textContent='Bağlantı hatası.';}
+}
+
+async function clearData(){
+  showConfirm(
+    adminLang==='tr'?'Tüm verileri sil?':'Delete all data?',
+    adminLang==='tr'?'Tüm katılımcı kayıtları kalıcı olarak silinecek. Bu işlem geri alınamaz.':'All participant records will be permanently deleted. This action cannot be undone.',
+    '⚠️',
+    async()=>{
+      const res=await fetch('/api/participants',{method:'DELETE',headers:authHeaders()});
+      if(res.status===401){doLogout();return;}
+      allData=[];days=0;renderStats();renderCohort();renderCharts();renderTable();
+    }
+  );
+}
+
+// ─── INIT ─────────────────────────────────────────────────────────────
+(async()=>{
+  const ok=await checkAuth();
+  if(!ok){
+    doLogout();
+  } else {
+    document.getElementById('loginOverlay').style.display='none';
+    loadData();
+  }
+})();
+
+setInterval(async()=>{
+  if(authToken && document.getElementById('loginOverlay').style.display==='none'){
+    loadData();
+  }
+},8000);
+
+// ── LANGUAGE ────────────────────────────────────────────────────────────
+let adminLang = 'tr';
+
+function setAdminLang(l) {
+  adminLang = l;
+  document.getElementById('lbTR').classList.toggle('active', l === 'tr');
+  document.getElementById('lbEN').classList.toggle('active', l === 'en');
+  // Static data-tr/data-en elements
+  document.querySelectorAll('[data-tr]').forEach(el => {
+    el.textContent = el.getAttribute('data-' + l);
+  });
+  // Affiliation
+  document.querySelectorAll('.aff-tr').forEach(el => el.style.display = l === 'tr' ? '' : 'none');
+  document.querySelectorAll('.aff-en').forEach(el => el.style.display = l === 'en' ? '' : 'none');
+  // Re-render dynamic content
+  renderStats(); renderCohort(); renderCharts(); renderTable();
+  // Update confirm cancel button text
+  const cc = document.querySelector('.confirm-cancel');
+  if(cc) cc.textContent = l === 'tr' ? 'İptal' : 'Cancel';
+  // Login button
+  const lb = document.getElementById('loginBtn');
+  if(lb) lb.textContent = l === 'tr' ? 'Giriş Yap' : 'Sign In';
+}
+
+// Patch renderStats to use adminLang
+const _origRenderStats = renderStats;
+renderStats = function() {
+  _origRenderStats();
+  // Labels re-apply after render
+  document.querySelectorAll('[data-tr]').forEach(el => {
+    el.textContent = el.getAttribute('data-' + adminLang);
+  });
+};
+
+</script>
+</body>
+</html>

@@ -1,0 +1,1797 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>XAI Health Demo</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f0f4f8;--surface:#fff;--surface2:#e8eef5;--surface3:#dde6f0;
+  --primary:#1a3a5c;--primary-light:#2a5a8c;--primary-dark:#0f2238;
+  --accent:#0ea5c9;--accent2:#10b981;--warn:#f59e0b;--danger:#ef4444;
+  --purple:#8b5cf6;
+  --text:#1e293b;--text2:#475569;--text3:#94a3b8;
+  --border:#cbd5e1;--radius:12px;
+  --shadow:0 2px 16px rgba(26,58,92,.10);--shadow-lg:0 8px 32px rgba(26,58,92,.16);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+header{background:var(--primary);padding:16px 28px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:200;box-shadow:0 2px 14px rgba(0,0,0,.2)}
+.hbrand{display:flex;align-items:center;gap:12px}
+.hlogo{width:36px;height:36px;background:var(--accent);border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:18px}
+.htitle{font-family:'DM Serif Display',serif;color:#fff;font-size:1.2rem}
+.hsub{color:rgba(255,255,255,.5);font-size:.72rem;margin-top:1px}
+.lang-toggle{display:flex;gap:6px}
+.lang-btn{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);color:rgba(255,255,255,.7);border-radius:7px;padding:5px 13px;font-size:.78rem;cursor:pointer;font-family:'Nunito',sans-serif;transition:all .2s}
+.lang-btn.active{background:var(--accent);border-color:var(--accent);color:#fff}
+.page{display:none}.page.active{display:block}
+.container{max-width:820px;margin:0 auto;padding:32px 18px 64px}
+/* INTRO */
+.intro-card{background:var(--primary);border-radius:18px;padding:32px 36px;margin-bottom:24px;position:relative;overflow:hidden}
+.intro-card::before{content:'';position:absolute;top:-50px;right:-50px;width:220px;height:220px;background:rgba(14,165,201,.1);border-radius:50%}
+.intro-card::after{content:'';position:absolute;bottom:-40px;right:60px;width:140px;height:140px;background:rgba(16,185,129,.07);border-radius:50%}
+.intro-tag{display:inline-block;background:rgba(14,165,201,.22);color:var(--accent);font-size:.7rem;font-weight:700;letter-spacing:.09em;text-transform:uppercase;padding:3px 11px;border-radius:100px;margin-bottom:12px;position:relative}
+.intro-card h1{font-family:'DM Serif Display',serif;color:#fff;font-size:1.8rem;line-height:1.25;margin-bottom:9px;position:relative}
+.intro-card p{color:rgba(255,255,255,.62);font-size:.88rem;line-height:1.6;position:relative}
+/* FORM */
+.form-card{background:var(--surface);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden;margin-bottom:16px}
+.fsec-head{background:var(--surface2);padding:13px 22px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--border)}
+.fsec-icon{width:28px;height:28px;background:var(--primary);border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
+.fsec-head h2{font-size:.82rem;font-weight:700;color:var(--primary);letter-spacing:.04em;text-transform:uppercase}
+.fbody{padding:20px 22px;display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.fbody.single{grid-template-columns:1fr}
+.fbody.triple{grid-template-columns:1fr 1fr 1fr}
+.field{display:flex;flex-direction:column;gap:5px}
+.field.full{grid-column:1/-1}
+label{font-size:.78rem;font-weight:500;color:var(--text2);letter-spacing:.02em}
+.opt-tag{font-size:.68rem;color:var(--text3);margin-left:3px}
+input[type=text],input[type=number],select{width:100%;padding:9px 13px;border:1.5px solid var(--border);border-radius:8px;font-family:'Nunito',sans-serif;font-size:.88rem;color:var(--text);background:var(--surface);outline:none;appearance:none;transition:border-color .2s,box-shadow .2s}
+input:focus,select:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(14,165,201,.12)}
+.pill-group{display:flex;flex-wrap:wrap;gap:7px}
+.pill-group input[type=radio],.pill-group input[type=checkbox]{display:none}
+.pill-group label{display:inline-flex;align-items:center;padding:6px 13px;border:1.5px solid var(--border);border-radius:100px;font-size:.78rem;font-weight:500;color:var(--text2);cursor:pointer;transition:all .16s;background:var(--surface);margin:0;letter-spacing:0;text-transform:none}
+.pill-group input:checked+label{background:var(--primary);border-color:var(--primary);color:#fff}
+.pill-group input[type=checkbox]:checked+label{background:var(--accent);border-color:var(--accent);color:#fff}
+.btn-primary{width:100%;padding:14px;background:var(--primary);color:#fff;border:none;border-radius:10px;font-family:'Nunito',sans-serif;font-size:.96rem;font-weight:700;cursor:pointer;transition:background .2s;letter-spacing:.01em}
+.btn-primary:hover{background:var(--primary-light)}
+.btn-primary:disabled{opacity:.55;cursor:not-allowed}
+.btn-secondary{padding:9px 20px;background:transparent;color:var(--primary);border:1.5px solid var(--primary);border-radius:8px;font-family:'Nunito',sans-serif;font-size:.84rem;font-weight:600;cursor:pointer;transition:all .18s}
+.btn-secondary:hover{background:var(--primary);color:#fff}
+.note-box{background:rgba(245,158,11,.08);border-left:3px solid var(--warn);padding:9px 13px;border-radius:0 8px 8px 0;font-size:.76rem;color:var(--text2);margin-top:12px}
+/* TOOLTIPS & EXPLANATIONS */
+.info-icon{display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;background:var(--accent);color:#fff;border-radius:50%;font-size:.6rem;font-weight:800;cursor:help;margin-left:5px;flex-shrink:0;vertical-align:middle;position:relative}
+.info-icon:hover .info-tip{display:block}
+.info-tip{display:none;position:absolute;left:22px;top:-4px;background:var(--primary);color:#fff;border-radius:9px;padding:9px 13px;font-size:.73rem;line-height:1.5;width:220px;z-index:100;box-shadow:0 4px 18px rgba(0,0,0,.22);font-weight:400;font-style:normal;white-space:normal}
+.info-tip::before{content:'';position:absolute;left:-5px;top:10px;border:5px solid transparent;border-right-color:var(--primary);border-left:none}
+.explain-box{background:rgba(14,165,201,.07);border-left:3px solid var(--accent);padding:10px 14px;border-radius:0 9px 9px 0;margin-top:10px;font-size:.78rem;color:var(--text2);line-height:1.6}
+.explain-box strong{color:var(--accent);font-weight:700}
+.factor-explain{font-size:.7rem;color:var(--text3);margin-top:3px;line-height:1.4;font-style:italic}
+.score-explain{font-size:.7rem;color:var(--text2);margin-top:5px;line-height:1.4;padding:0 4px}
+.what-panel{background:var(--surface);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden;margin-bottom:16px}
+.what-head{background:linear-gradient(135deg,#0ea5c9,#0284c7);padding:13px 20px;display:flex;align-items:center;gap:8px}
+.what-head h3{color:#fff;font-size:.84rem;font-weight:700}
+.what-body{padding:16px 20px;display:flex;flex-direction:column;gap:10px}
+.what-row{display:flex;gap:12px;padding:10px 14px;background:var(--surface2);border-radius:9px;align-items:flex-start}
+.what-icon{font-size:20px;flex-shrink:0;margin-top:1px}
+.what-title{font-size:.8rem;font-weight:700;color:var(--primary);margin-bottom:2px}
+.what-desc{font-size:.74rem;color:var(--text2);line-height:1.5}
+.what-formula{font-size:.67rem;color:var(--text3);margin-top:3px;font-style:italic}
+
+/* STEPS */
+.steps{display:flex;align-items:center;justify-content:center;margin-bottom:26px;gap:0;flex-wrap:wrap}
+.step{display:flex;align-items:center;gap:6px}
+.step-dot{width:26px;height:26px;border-radius:50%;background:var(--surface2);border:2px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:.68rem;font-weight:700;color:var(--text3);transition:all .3s}
+.step.active .step-dot{background:var(--primary);border-color:var(--primary);color:#fff}
+.step.done .step-dot{background:var(--accent2);border-color:var(--accent2);color:#fff}
+.step-lbl{font-size:.72rem;font-weight:500;color:var(--text3)}
+.step.active .step-lbl{color:var(--primary);font-weight:700}
+.step-line{width:28px;height:2px;background:var(--border);margin:0 2px}
+/* RESULT */
+.result-hero{background:var(--primary);border-radius:18px;padding:26px 28px;margin-bottom:20px;display:flex;align-items:center;gap:20px}
+.result-avatar{width:64px;height:64px;background:rgba(14,165,201,.2);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:28px;flex-shrink:0}
+.result-hero h2{font-family:'DM Serif Display',serif;color:#fff;font-size:1.4rem;margin-bottom:3px}
+.result-hero p{color:rgba(255,255,255,.58);font-size:.82rem}
+.score-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px}
+.score-card{background:var(--surface);border-radius:var(--radius);padding:18px 15px;box-shadow:var(--shadow);text-align:center;border-top:3px solid var(--border)}
+.score-card.low{border-top-color:var(--accent2)}.score-card.medium{border-top-color:var(--warn)}.score-card.high{border-top-color:var(--danger)}
+.score-val{font-family:'DM Serif Display',serif;font-size:2.1rem;color:var(--primary);line-height:1;margin-bottom:3px}
+.score-lbl{font-size:.68rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--text2);margin-bottom:5px}
+.score-badge{display:inline-block;font-size:.68rem;font-weight:700;padding:2px 9px;border-radius:100px}
+.badge-low{background:rgba(16,185,129,.12);color:var(--accent2)}.badge-medium{background:rgba(245,158,11,.12);color:var(--warn)}.badge-high{background:rgba(239,68,68,.12);color:var(--danger)}
+.panel{background:var(--surface);border-radius:var(--radius);box-shadow:var(--shadow);margin-bottom:16px;overflow:hidden}
+.panel-head{padding:14px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px}
+.panel-head h3{font-size:.86rem;font-weight:700;color:var(--primary)}
+.ph-tag{font-size:.65rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--accent);background:rgba(14,165,201,.1);padding:2px 7px;border-radius:4px;margin-left:auto}
+.panel-body{padding:16px 20px}
+.factor-row{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--surface2)}
+.factor-row:last-child{border-bottom:none}
+.fi{font-size:17px;width:26px;text-align:center;flex-shrink:0}
+.fn{font-size:.8rem;color:var(--text);flex:1;min-width:0}
+.fbar-wrap{width:120px;height:7px;background:var(--surface2);border-radius:3px;overflow:hidden;flex-shrink:0}
+.fbar{height:100%;border-radius:3px;transition:width .7s cubic-bezier(.22,1,.36,1)}
+.bar-pos{background:var(--danger)}.bar-neg{background:var(--accent2)}
+.fdelta{font-size:.76rem;font-weight:700;width:46px;text-align:right;flex-shrink:0}
+.dpos{color:var(--danger)}.dneg{color:var(--accent2)}
+.fdir{font-size:.72rem;color:var(--text3);width:18px;text-align:center;flex-shrink:0}
+.trust-check{display:flex;align-items:center;gap:7px;padding:7px 0;font-size:.8rem;color:var(--text2)}
+.dt-box{background:linear-gradient(135deg,var(--primary) 0%,#1e4d7a 100%);border-radius:var(--radius);padding:22px 24px;margin-bottom:16px;color:#fff;position:relative;overflow:hidden}
+.dt-box::before{content:'🧬';position:absolute;right:18px;top:50%;transform:translateY(-50%);font-size:56px;opacity:.1}
+.dt-box h3{font-family:'DM Serif Display',serif;font-size:1.1rem;margin-bottom:6px}
+.dt-box p{font-size:.8rem;color:rgba(255,255,255,.68);line-height:1.5;max-width:82%}
+.dt-chip{display:inline-block;margin-top:10px;background:rgba(14,165,201,.25);color:var(--accent);font-size:.68rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;padding:3px 9px;border-radius:5px}
+
+/* ── TWIN PAGE ── */
+.twin-wrap{display:grid;grid-template-columns:320px 1fr;gap:18px;margin-bottom:18px}
+.silhouette-card{background:var(--surface);border-radius:var(--radius);box-shadow:var(--shadow);padding:20px;display:flex;flex-direction:column;align-items:center;gap:12px}
+.sil-name{font-family:'DM Serif Display',serif;font-size:1rem;color:var(--primary);text-align:center}
+.sil-status{font-size:.72rem;font-weight:700;padding:3px 12px;border-radius:100px;text-align:center}
+.sil-wrap{position:relative;width:160px;height:280px}
+#silSvg{width:160px;height:280px}
+.sil-time{font-size:.72rem;color:var(--text3);text-align:center;line-height:1.4}
+.sil-age{font-family:'DM Serif Display',serif;font-size:1.8rem;color:var(--primary);text-align:center;line-height:1}
+.sil-age-lbl{font-size:.68rem;color:var(--text3);text-align:center;margin-top:2px}
+
+.twin-right{display:flex;flex-direction:column;gap:14px}
+.twin-metrics{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+.tm-card{background:var(--surface);border-radius:10px;padding:14px;box-shadow:var(--shadow);text-align:center;border-top:3px solid var(--border)}
+.tm-val{font-family:'DM Serif Display',serif;font-size:1.7rem;color:var(--primary);line-height:1}
+.tm-lbl{font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--text2);margin:3px 0}
+.tm-delta{font-size:.72rem;font-weight:700;padding:2px 7px;border-radius:100px;display:inline-block}
+.delta-up{background:rgba(239,68,68,.1);color:var(--danger)}
+.delta-dn{background:rgba(16,185,129,.1);color:var(--accent2)}
+.delta-fl{background:var(--surface2);color:var(--text3)}
+
+/* Time controls */
+.time-ctrl-card{background:var(--surface);border-radius:var(--radius);box-shadow:var(--shadow);padding:18px 22px}
+.tc-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px}
+.tc-title{font-size:.82rem;font-weight:700;color:var(--primary)}
+.tc-speed-group{display:flex;gap:6px;align-items:center}
+.tc-speed-label{font-size:.72rem;color:var(--text2)}
+.speed-btn{padding:4px 11px;border:1.5px solid var(--border);border-radius:100px;font-size:.72rem;cursor:pointer;background:var(--surface);color:var(--text2);font-family:'Nunito',sans-serif;font-weight:600;transition:all .16s}
+.speed-btn.active{background:var(--primary);border-color:var(--primary);color:#fff}
+.play-btn{width:36px;height:36px;border-radius:50%;background:var(--primary);border:none;color:#fff;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .2s;flex-shrink:0}
+.play-btn:hover{background:var(--primary-light)}
+.tl-points{display:flex;justify-content:space-between;margin-bottom:8px}
+.tl-pt{display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;padding:3px 5px;border-radius:6px;transition:background .18s}
+.tl-pt:hover{background:var(--surface2)}
+.tl-pt.active .tl-dot{background:var(--primary);transform:scale(1.4)}
+.tl-pt.active .tl-lbl{color:var(--primary);font-weight:700}
+.tl-dot{width:11px;height:11px;border-radius:50%;background:var(--border);transition:all .3s}
+.tl-lbl{font-size:.64rem;color:var(--text3);white-space:nowrap;transition:color .2s}
+.tl-track{height:4px;background:var(--surface2);border-radius:2px;overflow:hidden;margin-bottom:6px}
+.tl-fill{height:100%;border-radius:2px;background:linear-gradient(90deg,var(--accent2),var(--warn),var(--danger));transition:width .5s cubic-bezier(.22,1,.36,1)}
+.tl-current{text-align:center;font-size:.78rem;color:var(--text2)}
+.tl-current strong{color:var(--primary)}
+
+/* Scenario */
+.scenario-card{background:var(--surface);border-radius:var(--radius);box-shadow:var(--shadow);padding:18px 22px}
+.sc-title{font-size:.82rem;font-weight:700;color:var(--primary);margin-bottom:14px;display:flex;align-items:center;gap:6px}
+.sc-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+.sc-field label{font-size:.74rem;font-weight:500;color:var(--text2);display:block;margin-bottom:5px}
+.sc-pills{display:flex;flex-wrap:wrap;gap:5px}
+.sc-pill{padding:4px 11px;border:1.5px solid var(--border);border-radius:100px;font-size:.74rem;cursor:pointer;background:var(--surface);color:var(--text2);transition:all .15s;font-family:'Nunito',sans-serif;font-weight:500}
+.sc-pill.active{background:var(--primary);border-color:var(--primary);color:#fff}
+
+/* Chart */
+.chart-card{background:var(--surface);border-radius:var(--radius);box-shadow:var(--shadow);padding:18px 22px}
+.chart-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.chart-ttl{font-size:.84rem;font-weight:700;color:var(--primary)}
+.chart-legend{display:flex;gap:12px}
+.leg-item{display:flex;align-items:center;gap:4px;font-size:.7rem;color:var(--text2)}
+.leg-dot{width:7px;height:7px;border-radius:50%}
+#twinChart{width:100%;height:180px}
+
+/* XAI Narrative */
+.xai-nar{background:rgba(14,165,201,.06);border:1px solid rgba(14,165,201,.18);border-radius:var(--radius);padding:18px 20px}
+.xai-nar-title{font-size:.76rem;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:.07em;margin-bottom:10px;display:flex;align-items:center;gap:5px}
+.xai-ev-list{display:flex;flex-direction:column;gap:9px}
+.xai-ev{display:flex;gap:10px;padding:9px 13px;background:var(--surface);border-radius:8px;border-left:3px solid var(--border)}
+.xai-ev.warn{border-left-color:var(--warn)}.xai-ev.danger{border-left-color:var(--danger)}.xai-ev.good{border-left-color:var(--accent2)}
+.xai-ev-icon{font-size:16px;flex-shrink:0;margin-top:1px}
+.xai-ev-title{font-size:.78rem;font-weight:700;color:var(--text);margin-bottom:2px}
+.xai-ev-desc{font-size:.73rem;color:var(--text2);line-height:1.4}
+.xai-ev-chain{font-size:.67rem;color:var(--text3);margin-top:3px;font-style:italic}
+
+/* Network */
+.net-wrap{background:var(--surface);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden;margin-bottom:16px}
+.net-toolbar{padding:12px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.net-layer-btn{padding:4px 13px;border:1.5px solid var(--border);border-radius:100px;font-size:.73rem;cursor:pointer;background:var(--surface);color:var(--text2);font-family:'Nunito',sans-serif;transition:all .16s;font-weight:500}
+.net-layer-btn.active{background:var(--primary);border-color:var(--primary);color:#fff}
+#networkSvg{width:100%;height:500px;display:block}
+.net-legend{padding:12px 18px;border-top:1px solid var(--border);display:flex;gap:16px;flex-wrap:wrap}
+.net-leg-item{display:flex;align-items:center;gap:5px;font-size:.72rem;color:var(--text2)}
+.net-leg-dot{width:11px;height:11px;border-radius:50%}
+.net-tooltip{position:fixed;background:var(--primary);color:#fff;padding:9px 13px;border-radius:9px;font-size:.76rem;pointer-events:none;opacity:0;transition:opacity .18s;z-index:300;max-width:210px;line-height:1.5;box-shadow:0 4px 18px rgba(0,0,0,.22)}
+.net-tooltip strong{display:block;margin-bottom:2px;font-size:.8rem}
+.path-panel{background:rgba(14,165,201,.06);border:1px solid rgba(14,165,201,.18);border-radius:var(--radius);padding:16px 20px;margin-bottom:16px}
+.path-title{font-size:.76rem;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:.07em;margin-bottom:10px}
+.path-chain{display:flex;align-items:center;flex-wrap:wrap;gap:5px}
+.pnode{background:var(--surface);border:1.5px solid var(--border);border-radius:7px;padding:4px 11px;font-size:.76rem;font-weight:600;color:var(--text)}
+.pnode.inp{border-color:var(--accent);color:var(--accent);background:rgba(14,165,201,.08)}
+.pnode.mid{border-color:var(--warn);color:var(--warn);background:rgba(245,158,11,.08)}
+.pnode.out{border-color:var(--danger);color:var(--danger);background:rgba(239,68,68,.08)}
+.pnode.good{border-color:var(--accent2);color:var(--accent2);background:rgba(16,185,129,.08)}
+.parr{color:var(--text3);font-size:.9rem}
+.path-empty{font-size:.8rem;color:var(--text3);font-style:italic}
+
+/* CF */
+.cf-intro{background:rgba(14,165,201,.07);border-left:3px solid var(--accent);padding:11px 15px;border-radius:0 8px 8px 0;font-size:.8rem;color:var(--text2);margin-bottom:16px;line-height:1.5}
+.cf-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.cf-field label{font-size:.76rem;font-weight:500;color:var(--text2);display:block;margin-bottom:5px}
+.cf-pills{display:flex;gap:6px;flex-wrap:wrap}
+.cf-pill{padding:5px 13px;border:1.5px solid var(--border);border-radius:100px;font-size:.75rem;cursor:pointer;background:var(--surface);color:var(--text2);font-family:'Nunito',sans-serif;transition:all .15s}
+.cf-pill.active{background:var(--primary);border-color:var(--primary);color:#fff}
+.cf-result{margin-top:18px;background:var(--surface2);border-radius:10px;padding:16px 18px;display:flex;align-items:center;gap:16px}
+.cf-old{font-family:'DM Serif Display',serif;font-size:1.7rem;color:var(--text2);text-decoration:line-through}
+.cf-new{font-family:'DM Serif Display',serif;font-size:2rem;color:var(--primary)}
+.cf-arr{font-size:1.3rem;color:var(--accent)}
+.cf-info{font-size:.78rem;color:var(--text2);line-height:1.5}
+.cf-info strong{color:var(--accent2)}
+
+@media(max-width:680px){
+  .twin-wrap{grid-template-columns:1fr}
+  .sc-grid{grid-template-columns:1fr 1fr}
+  .twin-metrics{grid-template-columns:1fr 1fr}
+  .score-grid{grid-template-columns:1fr}
+  .fbody{grid-template-columns:1fr}
+  .fbody.triple{grid-template-columns:1fr 1fr}
+  header{padding:12px 14px}
+  .container{padding:16px 10px 48px}
+  .step-lbl{display:none}
+}
+
+/* ── AUTHOR / REFERENCES ── */
+.author-bar{background:#f8fafc;border-top:1px solid #e2e8f0;padding:8px 18px;display:flex;align-items:center;gap:8px;font-size:.73rem;color:#0f172a;flex-wrap:wrap}
+.author-bar a{color:#0369a1;text-decoration:none;font-weight:700}
+.author-bar a:hover{color:#fff;text-decoration:underline}
+.ref-modal-overlay{position:fixed;inset:0;background:rgba(15,34,56,.6);z-index:500;display:none;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(4px)}
+.ref-modal-overlay.open{display:flex}
+.ref-modal{background:var(--surface);border-radius:18px;width:100%;max-width:700px;max-height:85vh;overflow-y:auto;box-shadow:0 24px 64px rgba(15,34,56,.35)}
+.ref-modal-head{background:var(--primary);padding:18px 24px;border-radius:18px 18px 0 0;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:10}
+.ref-modal-head h2{font-family:'DM Serif Display',serif;color:#fff;font-size:1.05rem}
+.ref-modal-close{width:30px;height:30px;border-radius:50%;background:rgba(255,255,255,.12);border:none;color:#fff;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.ref-modal-close:hover{background:rgba(255,255,255,.25)}
+.ref-modal-body{padding:20px 24px}
+.ref-section{margin-bottom:20px}
+.ref-section-title{font-size:.72rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin-bottom:10px;padding-bottom:4px;border-bottom:2px solid rgba(14,165,201,.2)}
+.ref-item{padding:9px 0;border-bottom:1px solid var(--surface2);font-size:.76rem;line-height:1.55;color:var(--text2)}
+.ref-item:last-child{border-bottom:none}
+.ref-item strong{color:var(--text);font-weight:700}
+.ref-item .ref-note{font-size:.68rem;color:var(--text3);margin-top:2px;font-style:italic}
+.ref-btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;background:#fff;border:2px solid #0ea5c9;border-radius:8px;color:#0f172a;font-family:'Nunito',sans-serif;font-size:.76rem;font-weight:700;cursor:pointer;transition:all .18s;text-decoration:none}
+.ref-btn:hover{background:#0ea5c9;color:#fff}
+
+</style>
+</head>
+<body>
+
+<header>
+  <div class="hbrand">
+    <div class="hlogo">🔬</div>
+    <div>
+      <div class="htitle">XAI Health Demo</div>
+      <div class="hsub" id="hSub">Açıklanabilir YZ · Dijital İkiz Simülasyonu</div>
+    </div>
+  </div>
+  <div class="lang-toggle">
+    <button class="lang-btn active" onclick="setLang('tr')">TR</button>
+    <button class="lang-btn" onclick="setLang('en')">EN</button>
+  </div>
+</header>
+<div class="author-bar">
+  <span>👤 <strong style="color:#0f172a">Prof. Dr. Utku Köse</strong></span>
+  <span style="color:#94a3b8">|</span>
+  <span class="aff-tr">SDU, Türkiye · UND, ABD · VelTech, Hindistan · UP, Meksika</span>
+  <span class="aff-en" style="display:none">SDU, Turkey · UND, USA · VelTech, India · UP, Mexico</span>
+  <span style="color:#94a3b8">|</span>
+  <a href="mailto:utkukose@sdu.edu.tr">utkukose@sdu.edu.tr</a>
+  <span style="color:#94a3b8">·</span>
+  <a href="mailto:utkukose@gmail.com">utkukose@gmail.com</a>
+  <span style="color:#94a3b8">·</span>
+  <a href="https://www.utkukose.com" target="_blank">www.utkukose.com</a>
+  <span style="flex:1"></span>
+  <button class="ref-btn" onclick="openRefModal()">📚 <span data-tr="Bilimsel Kaynaklar" data-en="References">Bilimsel Kaynaklar</span></button>
+</div>
+
+<!-- ══ REFERENCES MODAL ══ -->
+<div class="ref-modal-overlay" id="refModalOverlay" onclick="if(event.target===this)closeRefModal()">
+  <div class="ref-modal">
+    <div class="ref-modal-head">
+      <h2 id="refModalTitle">📚 Bilimsel Kaynaklar</h2>
+      <button class="ref-modal-close" onclick="closeRefModal()">✕</button>
+    </div>
+    <div class="ref-modal-body" id="refModalBody"></div>
+  </div>
+</div>
+
+
+<!-- ══════════ PAGE 1: FORM ══════════ -->
+<div id="page-form" class="page active">
+<div class="container">
+  <div class="steps" id="st-form">
+    <div class="step active"><div class="step-dot">1</div><span class="step-lbl" data-tr="Veri" data-en="Data">Veri</span></div>
+    <div class="step-line"></div>
+    <div class="step"><div class="step-dot">2</div><span class="step-lbl" data-tr="XAI" data-en="XAI">XAI</span></div>
+    <div class="step-line"></div>
+    <div class="step"><div class="step-dot">3</div><span class="step-lbl" data-tr="Simülasyon" data-en="Simulation">Simülasyon</span></div>
+    <div class="step-line"></div>
+    <div class="step"><div class="step-dot">4</div><span class="step-lbl" data-tr="İkiz Evrimi" data-en="Twin Evolution">İkiz Evrimi</span></div>
+    <div class="step-line"></div>
+    <div class="step"><div class="step-dot">5</div><span class="step-lbl" data-tr="XAI Ağı" data-en="XAI Network">XAI Ağı</span></div>
+  </div>
+
+  <div class="intro-card">
+    <div class="intro-tag" data-tr="Seminer Demo Uygulaması" data-en="Seminar Demo Application">Seminer Demo Uygulaması</div>
+    <h1 data-tr="Dijital İkizinizi Oluşturun" data-en="Create Your Digital Twin">Dijital İkizinizi Oluşturun</h1>
+    <p data-tr="Verileriniz XAI modeliyle analiz edilir, kişisel risk raporu ve yaşayan dijital ikiziniz oluşturulur." data-en="Your data is analyzed with an XAI model to create a personalized risk report and a living digital twin.">Verileriniz XAI modeliyle analiz edilir, kişisel risk raporu ve yaşayan dijital ikiziniz oluşturulur.</p>
+  </div>
+
+  <!-- KİMLİK -->
+  <div class="form-card">
+    <div class="fsec-head"><div class="fsec-icon">👤</div><h2 data-tr="Kimlik" data-en="Identity">Kimlik</h2></div>
+    <div class="fbody">
+      <div class="field full"><label data-tr="Ad Soyad" data-en="Full Name">Ad Soyad</label><input type="text" id="f-name" placeholder="Adınızı ve soyadınızı giriniz"></div>
+      <div class="field"><label data-tr="Yaş" data-en="Age">Yaş</label><input type="number" id="f-age" min="18" max="90" placeholder="ör. 35"></div>
+      <div class="field"><label data-tr="Cinsiyet" data-en="Gender">Cinsiyet</label>
+        <div class="pill-group">
+          <input type="radio" name="gender" id="g-m" value="male"><label for="g-m" data-tr="Erkek" data-en="Male">Erkek</label>
+          <input type="radio" name="gender" id="g-f" value="female"><label for="g-f" data-tr="Kadın" data-en="Female">Kadın</label>
+          <input type="radio" name="gender" id="g-o" value="other"><label for="g-o" data-tr="Belirtmek istemiyorum" data-en="Prefer not to say">Belirtmek istemiyorum</label>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BİYOMETRİK -->
+  <div class="form-card">
+    <div class="fsec-head"><div class="fsec-icon">📏</div><h2 data-tr="Biyometrik" data-en="Biometric">Biyometrik</h2></div>
+    <div class="fbody">
+      <div class="field"><label data-tr="Boy (cm)" data-en="Height (cm)">Boy (cm)</label><input type="number" id="f-height" min="140" max="220" placeholder="ör. 175"></div>
+      <div class="field"><label data-tr="Kilo (kg)" data-en="Weight (kg)">Kilo (kg)</label><input type="number" id="f-weight" min="40" max="200" placeholder="ör. 75"></div>
+      <div class="field full"><label data-tr="Kan Basıncı" data-en="Blood Pressure">Kan Basıncı</label>
+        <div class="pill-group">
+          <input type="radio" name="bp" id="bp-n" value="normal"><label for="bp-n" data-tr="Normal" data-en="Normal">Normal</label>
+          <input type="radio" name="bp" id="bp-h" value="high"><label for="bp-h" data-tr="Yüksek" data-en="High">Yüksek</label>
+          <input type="radio" name="bp" id="bp-l" value="low"><label for="bp-l" data-tr="Düşük" data-en="Low">Düşük</label>
+          <input type="radio" name="bp" id="bp-u" value="unknown"><label for="bp-u" data-tr="Bilmiyorum" data-en="Unknown">Bilmiyorum</label>
+        </div>
+      </div>
+      <div class="field full"><label data-tr="Kolesterol (hiç ölçtürdünüz mü?)" data-en="Cholesterol (ever measured?)">Kolesterol</label>
+        <div class="pill-group">
+          <input type="radio" name="chol" id="ch-n" value="normal"><label for="ch-n" data-tr="Normal" data-en="Normal">Normal</label>
+          <input type="radio" name="chol" id="ch-h" value="high"><label for="ch-h" data-tr="Yüksek" data-en="High">Yüksek</label>
+          <input type="radio" name="chol" id="ch-u" value="unknown"><label for="ch-u" data-tr="Bilmiyorum" data-en="Unknown">Bilmiyorum</label>
+        </div>
+      </div>
+      <div class="field full"><label data-tr="Kan Şekeri / Diyabet Durumu" data-en="Blood Sugar / Diabetes Status">Kan Şekeri</label>
+        <div class="pill-group">
+          <input type="radio" name="glucose" id="gl-n" value="normal"><label for="gl-n" data-tr="Normal" data-en="Normal">Normal</label>
+          <input type="radio" name="glucose" id="gl-pre" value="prediabetes"><label for="gl-pre" data-tr="Prediyabet" data-en="Prediabetes">Prediyabet</label>
+          <input type="radio" name="glucose" id="gl-dm" value="diabetes"><label for="gl-dm" data-tr="Diyabet" data-en="Diabetes">Diyabet</label>
+          <input type="radio" name="glucose" id="gl-u" value="unknown"><label for="gl-u" data-tr="Bilmiyorum" data-en="Unknown">Bilmiyorum</label>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- YAŞAM TARZI -->
+  <div class="form-card">
+    <div class="fsec-head"><div class="fsec-icon">🌿</div><h2 data-tr="Yaşam Tarzı" data-en="Lifestyle">Yaşam Tarzı</h2></div>
+    <div class="fbody single">
+      <div class="field"><label data-tr="Sigara" data-en="Smoking">Sigara <span class="info-icon">i<span class="info-tip">Sigara, kan damarlarında oksidatif stres ve inflamasyona yol açar. KV risk hesabında en yüksek ağırlığa sahip faktördür.</span></span></label>
+        <div class="pill-group">
+          <input type="radio" name="smoking" id="sm-0" value="0"><label for="sm-0" data-tr="Hiç içmedim" data-en="Never">Hiç içmedim</label>
+          <input type="radio" name="smoking" id="sm-q" value="0.4"><label for="sm-q" data-tr="Bıraktım" data-en="Former">Bıraktım</label>
+          <input type="radio" name="smoking" id="sm-l" value="0.7"><label for="sm-l" data-tr="Hafif (&lt;10/gün)" data-en="Light (&lt;10/day)">Hafif (&lt;10/gün)</label>
+          <input type="radio" name="smoking" id="sm-h" value="1"><label for="sm-h" data-tr="Yoğun (10+/gün)" data-en="Heavy (10+/day)">Yoğun (10+/gün)</label>
+        </div>
+      </div>
+      <div class="field"><label data-tr="Alkol" data-en="Alcohol">Alkol <span class="info-icon">i<span class="info-tip">Düzenli alkol tüketimi karaciğer inflamasyonu, trigliserit yüksekliği ve kan basıncı artışı ile ilişkilidir.</span></span></label>
+        <div class="pill-group">
+          <input type="radio" name="alcohol" id="al-0" value="0"><label for="al-0" data-tr="Kullanmıyorum" data-en="None">Kullanmıyorum</label>
+          <input type="radio" name="alcohol" id="al-r" value="0.3"><label for="al-r" data-tr="Nadiren" data-en="Rarely">Nadiren</label>
+          <input type="radio" name="alcohol" id="al-m" value="0.6"><label for="al-m" data-tr="Haftalık" data-en="Weekly">Haftalık</label>
+          <input type="radio" name="alcohol" id="al-d" value="1"><label for="al-d" data-tr="Günlük" data-en="Daily">Günlük</label>
+        </div>
+      </div>
+      <div class="field"><label data-tr="Fiziksel Aktivite" data-en="Physical Activity">Fiziksel Aktivite <span class="info-icon">i<span class="info-tip">Düzenli egzersiz insülin duyarlılığını artırır, kan basıncını düşürür ve hem KV hem metabolik riski azaltır.</span></span></label>
+        <div class="pill-group">
+          <input type="radio" name="activity" id="ac-0" value="0"><label for="ac-0" data-tr="Hareketsiz" data-en="Sedentary">Hareketsiz</label>
+          <input type="radio" name="activity" id="ac-l" value="0.4"><label for="ac-l" data-tr="Hafif (1-2/hafta)" data-en="Light (1-2/wk)">Hafif</label>
+          <input type="radio" name="activity" id="ac-m" value="0.7"><label for="ac-m" data-tr="Orta (3-4/hafta)" data-en="Moderate (3-4/wk)">Orta</label>
+          <input type="radio" name="activity" id="ac-h" value="1"><label for="ac-h" data-tr="Aktif (5+/hafta)" data-en="Active (5+/wk)">Aktif</label>
+        </div>
+      </div>
+      <div class="field"><label data-tr="Beslenme Kalitesi" data-en="Diet Quality">Beslenme Kalitesi <span class="info-icon">i<span class="info-tip">Akdeniz diyeti; antiinflamatuar besinler, sağlıklı yağlar ve lif içeriğiyle tüm risk boyutlarını olumlu etkiler.</span></span></label>
+        <div class="pill-group">
+          <input type="radio" name="diet" id="di-bad" value="0"><label for="di-bad" data-tr="Fast food ağırlıklı" data-en="Mostly fast food">Fast food ağırlıklı</label>
+          <input type="radio" name="diet" id="di-avg" value="0.5"><label for="di-avg" data-tr="Karışık" data-en="Mixed">Karışık</label>
+          <input type="radio" name="diet" id="di-good" value="1"><label for="di-good" data-tr="Akdeniz / sağlıklı" data-en="Mediterranean / healthy">Akdeniz / sağlıklı</label>
+        </div>
+      </div>
+      <div class="field"><label data-tr="Günlük Adım (yaklaşık)" data-en="Daily Steps (approx.)">Günlük Adım</label>
+        <div class="pill-group">
+          <input type="radio" name="steps" id="st-low" value="0"><label for="st-low" data-tr="&lt;3.000" data-en="&lt;3,000">&lt;3.000</label>
+          <input type="radio" name="steps" id="st-mid" value="0.5"><label for="st-mid" data-tr="3-7.000" data-en="3-7,000">3-7.000</label>
+          <input type="radio" name="steps" id="st-hi" value="1"><label for="st-hi" data-tr="7.000+" data-en="7,000+">7.000+</label>
+        </div>
+      </div>
+      <div class="field"><label data-tr="Uyku Süresi" data-en="Sleep Duration">Uyku Süresi <span class="info-icon">i<span class="info-tip">Yetersiz uyku (≤5 saat) bağışıklık baskılanması, kortizol yüksekliği ve metabolik bozukluklarla ilişkilidir. İdeal: 6-8 saat.</span></span></label>
+        <div class="pill-group">
+          <input type="radio" name="sleep" id="sl-0" value="0"><label for="sl-0" data-tr="&lt;5 saat" data-en="&lt;5h">&lt;5 saat</label>
+          <input type="radio" name="sleep" id="sl-5" value="0.4"><label for="sl-5" data-tr="5-6 saat" data-en="5-6h">5-6 saat</label>
+          <input type="radio" name="sleep" id="sl-7" value="1"><label for="sl-7" data-tr="6-8 saat (ideal)" data-en="6-8h (ideal)">6-8 saat</label>
+          <input type="radio" name="sleep" id="sl-9" value="0.6"><label for="sl-9" data-tr="8+ saat" data-en="8+h">8+ saat</label>
+        </div>
+      </div>
+      <div class="field"><label data-tr="Stres Düzeyi" data-en="Stress Level">Stres Düzeyi <span class="info-icon">i<span class="info-tip">Kronik stres, HPA eksenini aktive ederek kortizol yüksekliğine neden olur. Bu; kan şekeri, uyku kalitesi ve bağışıklığı olumsuz etkiler.</span></span></label>
+        <div class="pill-group">
+          <input type="radio" name="stress" id="str-0" value="0"><label for="str-0" data-tr="Düşük" data-en="Low">Düşük</label>
+          <input type="radio" name="stress" id="str-m" value="0.5"><label for="str-m" data-tr="Orta" data-en="Moderate">Orta</label>
+          <input type="radio" name="stress" id="str-h" value="0.8"><label for="str-h" data-tr="Yüksek" data-en="High">Yüksek</label>
+          <input type="radio" name="stress" id="str-x" value="1"><label for="str-x" data-tr="Çok yüksek / kronik" data-en="Very high / chronic">Kronik</label>
+        </div>
+      </div>
+      <div class="field"><label data-tr="Ruh Hali / Mutluluk Düzeyi" data-en="Mood / Happiness Level">Ruh Hali / Mutluluk <span class="info-icon">i<span class="info-tip">Kronik tükenme ve depresif belirtiler, HPA eksen aktivasyonu ve sempatik sinir sistemi aşırı uyarımı yoluyla genel sağlığı etkiler.</span></span></label>
+        <div class="pill-group">
+          <input type="radio" name="mood" id="mo-0" value="0"><label for="mo-0" data-tr="İyi / Mutlu" data-en="Good / Happy">İyi / Mutlu</label>
+          <input type="radio" name="mood" id="mo-m" value="0.4"><label for="mo-m" data-tr="Değişken" data-en="Variable">Değişken</label>
+          <input type="radio" name="mood" id="mo-h" value="0.7"><label for="mo-h" data-tr="Mutsuz / Yorgun" data-en="Unhappy / Tired">Mutsuz / Yorgun</label>
+          <input type="radio" name="mood" id="mo-x" value="1"><label for="mo-x" data-tr="Tükenmiş / Depresif" data-en="Burned out / Depressed">Tükenmiş</label>
+        </div>
+      </div>
+      <div class="field"><label data-tr="Sosyal Bağlantı" data-en="Social Connection">Sosyal Bağlantı <span class="info-icon">i<span class="info-tip">Sosyal izolasyon, kronik inflamasyon ve artmış kortizol seviyeleriyle bağlantılıdır. Güçlü sosyal çevre koruyucu etki gösterir.</span></span></label>
+        <div class="pill-group">
+          <input type="radio" name="social" id="so-0" value="1"><label for="so-0" data-tr="Güçlü sosyal çevre" data-en="Strong social circle">Güçlü sosyal çevre</label>
+          <input type="radio" name="social" id="so-m" value="0.5"><label for="so-m" data-tr="Orta düzey" data-en="Moderate">Orta düzey</label>
+          <input type="radio" name="social" id="so-h" value="0"><label for="so-h" data-tr="Yalnız / İzole" data-en="Lonely / Isolated">Yalnız / İzole</label>
+        </div>
+      </div>
+      <div class="field"><label data-tr="Günlük Ekran / Oturma Süresi" data-en="Daily Screen / Sitting Time">Ekran / Oturma Süresi</label>
+        <div class="pill-group">
+          <input type="radio" name="sitting" id="si-0" value="0"><label for="si-0" data-tr="&lt;4 saat" data-en="&lt;4h">&lt;4 saat</label>
+          <input type="radio" name="sitting" id="si-m" value="0.5"><label for="si-m" data-tr="4-8 saat" data-en="4-8h">4-8 saat</label>
+          <input type="radio" name="sitting" id="si-h" value="1"><label for="si-h" data-tr="8+ saat" data-en="8+h">8+ saat</label>
+        </div>
+      </div>
+      <div class="field"><label data-tr="Su Tüketimi (günlük)" data-en="Water Intake (daily)">Su Tüketimi <span class="info-icon">i<span class="info-tip">Yeterli hidrasyon, böbrek fonksiyonu, metabolizma ve enerji seviyesi için kritiktir. Günlük 2+ litre önerilir.</span></span></label>
+        <div class="pill-group">
+          <input type="radio" name="water" id="wa-0" value="0"><label for="wa-0" data-tr="&lt;1 litre" data-en="&lt;1L">&lt;1 litre</label>
+          <input type="radio" name="water" id="wa-m" value="0.5"><label for="wa-m" data-tr="1-2 litre" data-en="1-2L">1-2 litre</label>
+          <input type="radio" name="water" id="wa-h" value="1"><label for="wa-h" data-tr="2+ litre" data-en="2+L">2+ litre</label>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SAĞLIK GEÇMİŞİ -->
+  <div class="form-card">
+    <div class="fsec-head"><div class="fsec-icon">🏥</div><h2 data-tr="Sağlık Geçmişi" data-en="Health History">Sağlık Geçmişi</h2></div>
+    <div class="fbody single">
+      <div class="field"><label data-tr="Kişisel hastalık geçmişi" data-en="Personal medical history">Kişisel hastalık geçmişi</label>
+        <div class="pill-group">
+          <input type="radio" name="hx" id="hx-0" value="none"><label for="hx-0" data-tr="Yok" data-en="None">Yok</label>
+          <input type="radio" name="hx" id="hx-c" value="cardio"><label for="hx-c" data-tr="Kalp-damar" data-en="Cardiovascular">Kalp-damar</label>
+          <input type="radio" name="hx" id="hx-m" value="metabolic"><label for="hx-m" data-tr="Metabolik" data-en="Metabolic">Metabolik</label>
+          <input type="radio" name="hx" id="hx-r" value="respiratory"><label for="hx-r" data-tr="Solunum" data-en="Respiratory">Solunum</label>
+          <input type="radio" name="hx" id="hx-o" value="other"><label for="hx-o" data-tr="Diğer kronik" data-en="Other chronic">Diğer kronik</label>
+        </div>
+      </div>
+      <div class="field"><label data-tr="Sürekli kullandığınız ilaçlar (birden fazla seçebilirsiniz)" data-en="Regular medications (multiple allowed)">Sürekli kullandığınız ilaçlar <span class="opt-tag">(birden fazla seçebilirsiniz)</span> <span class="info-icon">i<span class="info-tip">İlaçlar risk modeline entegre edilir. Örn: Statin KV riski düşürür, kronik NSAID hafifçe artırır. İlaçsız kullanım ile ilaçlı kullanım arasındaki farkı görmek için farklı seçimler deneyin.</span></span></label>
+        <div class="pill-group">
+          <input type="checkbox" name="meds" id="med-none" value="none"><label for="med-none" data-tr="İlaç kullanmıyorum" data-en="No medication">İlaç kullanmıyorum</label>
+          <input type="checkbox" name="meds" id="med-bp" value="bp"><label for="med-bp" data-tr="Tansiyon (ACE/ARB)" data-en="BP (ACE/ARB)">Tansiyon</label>
+          <input type="checkbox" name="meds" id="med-bb" value="betablocker"><label for="med-bb" data-tr="Beta bloker" data-en="Beta blocker">Beta bloker</label>
+          <input type="checkbox" name="meds" id="med-st" value="statin"><label for="med-st" data-tr="Statin (kolesterol)" data-en="Statin (cholesterol)">Statin</label>
+          <input type="checkbox" name="meds" id="med-as" value="aspirin"><label for="med-as" data-tr="Aspirin (koruyucu)" data-en="Aspirin (prophylactic)">Aspirin</label>
+          <input type="checkbox" name="meds" id="med-me" value="metformin"><label for="med-me" data-tr="Metformin" data-en="Metformin">Metformin</label>
+          <input type="checkbox" name="meds" id="med-in" value="insulin"><label for="med-in" data-tr="İnsülin" data-en="Insulin">İnsülin</label>
+          <input type="checkbox" name="meds" id="med-th" value="thyroid"><label for="med-th" data-tr="Tiroit ilacı" data-en="Thyroid medication">Tiroit ilacı</label>
+          <input type="checkbox" name="meds" id="med-wa" value="anticoag"><label for="med-wa" data-tr="Kan sulandırıcı" data-en="Anticoagulant">Kan sulandırıcı</label>
+          <input type="checkbox" name="meds" id="med-ps" value="psych"><label for="med-ps" data-tr="Antidepresan / anksiyolitik" data-en="Antidepressant / anxiolytic">Antidepresan</label>
+          <input type="checkbox" name="meds" id="med-ns" value="nsaid"><label for="med-ns" data-tr="Ağrı kesici (kronik NSAID)" data-en="Pain killer (chronic NSAID)">Kronik ağrı kesici</label>
+          <input type="checkbox" name="meds" id="med-bi" value="biologic"><label for="med-bi" data-tr="Biyolojik ajan / romatizma" data-en="Biologic / rheumatology">Biyolojik ajan</label>
+          <input type="checkbox" name="meds" id="med-in2" value="inhaler"><label for="med-in2" data-tr="İnhaler (astım/KOAH)" data-en="Inhaler (asthma/COPD)">İnhaler</label>
+          <input type="checkbox" name="meds" id="med-vt" value="vitamins"><label for="med-vt" data-tr="Vitamin/takviye (D, B12, Omega-3)" data-en="Vitamins (D, B12, Omega-3)">Vitamin/takviye</label>
+        </div>
+      </div>
+      <div class="field"><label data-tr="Ailede kronik hastalık" data-en="Family history">Ailede kronik hastalık <span class="opt-tag">(isteğe bağlı)</span></label>
+        <div class="pill-group">
+          <input type="checkbox" name="famhx" id="fh-0" value="none"><label for="fh-0" data-tr="Yok / Bilmiyorum" data-en="None / Unknown">Yok / Bilmiyorum</label>
+          <input type="checkbox" name="famhx" id="fh-h" value="heart"><label for="fh-h" data-tr="Kalp" data-en="Heart">Kalp</label>
+          <input type="checkbox" name="famhx" id="fh-d" value="diabetes"><label for="fh-d" data-tr="Diyabet" data-en="Diabetes">Diyabet</label>
+          <input type="checkbox" name="famhx" id="fh-c" value="cancer"><label for="fh-c" data-tr="Kanser" data-en="Cancer">Kanser</label>
+          <input type="checkbox" name="famhx" id="fh-ht" value="hypertension"><label for="fh-ht" data-tr="Hipertansiyon" data-en="Hypertension">Hipertansiyon</label>
+          <input type="checkbox" name="famhx" id="fh-st" value="stroke"><label for="fh-st" data-tr="İnme" data-en="Stroke">İnme</label>
+        </div>
+        <div class="note-box" data-tr="💡 Bu bilgi isteğe bağlıdır, yalnızca risk modelini iyileştirmek için kullanılır." data-en="💡 Optional — only used to improve the risk model.">💡 Bu bilgi isteğe bağlıdır, yalnızca risk modelini iyileştirmek için kullanılır.</div>
+      </div>
+    </div>
+  </div>
+
+  <button class="btn-primary" id="btnSubmit" onclick="submitForm()">Dijital İkizimi Oluştur ve Analiz Et →</button>
+</div>
+</div>
+
+<!-- ══════════ PAGE 2: RESULT ══════════ -->
+<div id="page-result" class="page">
+<div class="container">
+  <div class="steps"><div class="step done"><div class="step-dot">✓</div><span class="step-lbl">Veri</span></div><div class="step-line"></div><div class="step active"><div class="step-dot">2</div><span class="step-lbl">XAI</span></div><div class="step-line"></div><div class="step"><div class="step-dot">3</div></div><div class="step-line"></div><div class="step"><div class="step-dot">4</div></div><div class="step-line"></div><div class="step"><div class="step-dot">5</div></div></div>
+  <div class="result-hero"><div class="result-avatar">🧬</div><div><h2 id="rName">—</h2><p id="rSub">XAI Risk Analiz Raporu · Dijital İkiz</p></div></div>
+  <div class="score-grid" id="scoreGrid"></div>
+  <p id="bmiNote" style="text-align:center;font-size:.76rem;color:var(--text3);margin-top:-10px;margin-bottom:18px"></p>
+  <div class="dt-box"><h3 id="dtTitle">Dijital İkiziniz Oluşturuldu</h3><p id="dtDesc"></p><span class="dt-chip" data-tr="Digital Twin · Aktif" data-en="Digital Twin · Active">Digital Twin · Aktif</span></div>
+  <div class="panel"><div class="panel-head"><h3 data-tr="XAI Faktör Analizi — KV Risk" data-en="XAI Factor Analysis — CV Risk">XAI Faktör Analizi — KV Risk</h3><span class="ph-tag" data-tr="SHAP Benzeri" data-en="SHAP-like">SHAP Benzeri</span></div><div class="panel-body" id="factorList"></div></div>
+  <div class="panel"><div class="panel-head"><h3 data-tr="Model Güvenirlik Kontrolü" data-en="Model Trust Check">Model Güvenirlik Kontrolü</h3><span class="ph-tag" data-tr="Sağduyu Testi" data-en="Sanity Test">Sağduyu Testi</span></div><div class="panel-body" id="trustList"></div></div>
+  <div class="what-panel">
+    <div class="what-head"><h3 data-tr="📊 Bu skorlar ne anlama geliyor?" data-en="📊 What do these scores mean?">📊 Bu skorlar ne anlama geliyor?</h3></div>
+    <div class="what-body" id="whatPanel"></div>
+  </div>
+  <div style="display:flex;gap:10px;flex-wrap:wrap">
+    <button class="btn-primary" style="flex:1;background:var(--accent)" onclick="goTwin()"><span data-tr="İkiz Evrimi →" data-en="Twin Evolution →">İkiz Evrimi →</span></button>
+  </div>
+  <div style="text-align:center;margin-top:10px"><button class="btn-secondary" onclick="showPage('page-form')"><span data-tr="← Geri" data-en="← Back">← Geri</span></button></div>
+</div>
+</div>
+
+</div>
+
+<!-- ══════════ PAGE 4: TWIN EVOLUTION ══════════ -->
+<div id="page-twin" class="page">
+<div class="container" style="max-width:900px">
+  <div class="steps"><div class="step done"><div class="step-dot">✓</div></div><div class="step-line"></div><div class="step done"><div class="step-dot">✓</div></div><div class="step-line"></div><div class="step done"><div class="step-dot">✓</div></div><div class="step-line"></div><div class="step active"><div class="step-dot">4</div><span class="step-lbl" data-tr="İkiz Evrimi" data-en="Twin Evolution">İkiz Evrimi</span></div><div class="step-line"></div><div class="step"><div class="step-dot">5</div></div></div>
+
+  <div class="intro-card" style="margin-bottom:18px">
+    <div class="intro-tag" data-tr="Dijital İkiz · Zaman Evrimi" data-en="Digital Twin · Time Evolution">Dijital İkiz · Zaman Evrimi</div>
+    <h1 style="font-size:1.4rem" data-tr="Dijital İkiziniz Zaman İçinde Nasıl Evrilir?" data-en="How Does Your Digital Twin Evolve Over Time?">Dijital İkiziniz Zaman İçinde Nasıl Evrilir?</h1>
+    <p data-tr="Gerçek zamanlı veya hızlandırılmış modda izleyin. Yaşam tarzını değiştirin, ikizi anında güncellensin." data-en="Watch in real-time or accelerated mode. Change lifestyle and the twin updates instantly.">Gerçek zamanlı veya hızlandırılmış modda izleyin. Yaşam tarzını değiştirin, ikizi anında güncellensin.</p>
+  </div>
+
+  <!-- SİLÜET + SAĞ PANEL -->
+  <div class="twin-wrap">
+    <!-- Silhouette -->
+    <div class="silhouette-card">
+      <div class="sil-name" id="silName">—</div>
+      <div class="sil-status" id="silStatus">—</div>
+      <div class="sil-wrap">
+        <svg id="silSvg" viewBox="0 0 160 280" xmlns="http://www.w3.org/2000/svg">
+          <!-- BODY SILHOUETTE -->
+          <!-- Head -->
+          <circle id="sil-head" cx="80" cy="30" r="22" fill="#e8eef5" stroke="#cbd5e1" stroke-width="1.5"/>
+          <!-- Neck -->
+          <rect id="sil-neck" x="72" y="50" width="16" height="14" rx="4" fill="#e8eef5" stroke="#cbd5e1" stroke-width="1"/>
+          <!-- Torso -->
+          <path id="sil-torso" d="M50,64 Q40,80 38,120 Q37,140 50,145 L110,145 Q123,140 122,120 Q120,80 110,64 Z" fill="#e8eef5" stroke="#cbd5e1" stroke-width="1.5"/>
+          <!-- ORGANS (inside torso) -->
+          <!-- Heart -->
+          <path id="sil-heart" d="M72,90 C72,85 67,82 64,86 C61,82 56,85 56,90 C56,95 64,103 64,103 C64,103 72,95 72,90 Z" fill="#fca5a5" opacity="0.7"/>
+          <!-- Lungs -->
+          <ellipse id="sil-lung-l" cx="57" cy="100" rx="8" ry="12" fill="#bfdbfe" opacity="0.6"/>
+          <ellipse id="sil-lung-r" cx="87" cy="100" rx="8" ry="12" fill="#bfdbfe" opacity="0.6"/>
+          <!-- Liver -->
+          <ellipse id="sil-liver" cx="76" cy="120" rx="14" ry="8" fill="#fed7aa" opacity="0.6"/>
+          <!-- Gut/metabolic -->
+          <ellipse id="sil-gut" cx="72" cy="135" rx="12" ry="7" fill="#d9f99d" opacity="0.5"/>
+          <!-- Brain highlight -->
+          <ellipse id="sil-brain" cx="80" cy="26" rx="16" ry="12" fill="#e9d5ff" opacity="0.5"/>
+          <!-- Arms -->
+          <path id="sil-arm-l" d="M50,70 Q30,90 28,130" stroke="#cbd5e1" stroke-width="18" stroke-linecap="round" fill="none"/>
+          <path id="sil-arm-r" d="M110,70 Q130,90 132,130" stroke="#cbd5e1" stroke-width="18" stroke-linecap="round" fill="none"/>
+          <!-- Legs -->
+          <path id="sil-leg-l" d="M62,145 Q58,185 55,225" stroke="#cbd5e1" stroke-width="20" stroke-linecap="round" fill="none"/>
+          <path id="sil-leg-r" d="M98,145 Q102,185 105,225" stroke="#cbd5e1" stroke-width="20" stroke-linecap="round" fill="none"/>
+          <!-- Waist/belly indicator -->
+          <ellipse id="sil-belly" cx="74" cy="130" rx="18" ry="10" fill="none" stroke="none"/>
+          <!-- Posture overlay (aging effect) -->
+          <g id="sil-aging-overlay" opacity="0"></g>
+          <!-- Pulse rings on heart -->
+          <circle id="sil-pulse1" cx="64" cy="91" r="10" fill="none" stroke="#ef4444" stroke-width="1.5" opacity="0"/>
+          <circle id="sil-pulse2" cx="64" cy="91" r="16" fill="none" stroke="#ef4444" stroke-width="1" opacity="0"/>
+        </svg>
+      </div>
+      <div class="sil-age" id="silAge">—</div>
+      <div class="sil-age-lbl" id="silAgeLbl" data-tr="Biyolojik Yaş" data-en="Biological Age">Biyolojik Yaş</div>
+      <div class="sil-time" id="silTime"></div>
+    </div>
+
+    <!-- Right panel -->
+    <div class="twin-right">
+      <!-- Time controls -->
+      <div class="time-ctrl-card">
+        <div class="tc-header">
+          <span class="tc-title" data-tr="⏱ Zaman Kontrolü" data-en="⏱ Time Control">⏱ Zaman Kontrolü</span>
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+            <span class="tc-speed-label" data-tr="Hız:" data-en="Speed:">Hız:</span>
+            <div class="tc-speed-group">
+              <button class="speed-btn" onclick="setSpeed('realtime',this)" data-tr="Gerçek" data-en="Real">Gerçek</button>
+              <button class="speed-btn active" onclick="setSpeed('month',this)" data-tr="1s=1ay" data-en="1s=1mo">1s=1ay</button>
+              <button class="speed-btn" onclick="setSpeed('year',this)" data-tr="1s=1yıl" data-en="1s=1yr">1s=1yıl</button>
+              <button class="speed-btn" onclick="setSpeed('decade',this)" data-tr="1s=10yıl" data-en="1s=10yr">1s=10yıl</button>
+            </div>
+            <button class="play-btn" id="playBtn" onclick="togglePlay()">▶</button>
+          </div>
+        </div>
+        <div class="tl-points" id="tlPoints"></div>
+        <div class="tl-track"><div class="tl-fill" id="tlFill" style="width:0%"></div></div>
+        <div class="tl-current" id="tlCurrent"></div>
+      </div>
+
+      <!-- Metrics -->
+      <div class="twin-metrics" id="twinMetrics"></div>
+
+      <!-- Chart -->
+      <div class="chart-card">
+        <div class="chart-head">
+          <span class="chart-ttl" data-tr="Risk Eğrisi" data-en="Risk Curve">Risk Eğrisi</span>
+          <div class="chart-legend">
+            <div class="leg-item"><div class="leg-dot" style="background:var(--danger)"></div><span>KV</span></div>
+            <div class="leg-item"><div class="leg-dot" style="background:var(--warn)"></div><span data-tr="Met" data-en="Met">Met</span></div>
+            <div class="leg-item"><div class="leg-dot" style="background:var(--accent)"></div><span data-tr="Genel" data-en="General">Genel</span></div>
+          </div>
+        </div>
+        <canvas id="twinChart"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scenario -->
+  <div class="scenario-card" style="margin-bottom:16px">
+    <div class="sc-title">⚙️ <span data-tr="Yaşam Senaryosu — bu koşullar devam ederse..." data-en="Life Scenario — if these conditions persist...">Yaşam Senaryosu</span></div>
+    <div class="sc-grid" id="scGrid"></div>
+  </div>
+
+  <!-- XAI Narrative -->
+  <div class="xai-nar">
+    <div class="xai-nar-title">🔍 <span data-tr="XAI — Bu Noktada Ne Oluyor?" data-en="XAI — What Is Happening at This Point?">XAI — Bu Noktada Ne Oluyor?</span></div>
+    <div class="xai-ev-list" id="xaiNarList"></div>
+  </div>
+
+  <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:16px">
+    <button class="btn-secondary" onclick="showPage('page-result')"><span data-tr="← XAI Raporu" data-en="← XAI Report">← XAI Raporu</span></button>
+    <button class="btn-primary" style="flex:1;background:var(--purple)" onclick="showPage('page-network');initNetwork()"><span data-tr="XAI Ağı →" data-en="XAI Network →">XAI Ağı →</span></button>
+  </div>
+</div>
+</div>
+
+<!-- ══════════ PAGE 5: XAI NETWORK ══════════ -->
+<div id="page-network" class="page">
+<div class="container" style="max-width:960px">
+  <div class="steps"><div class="step done"><div class="step-dot">✓</div></div><div class="step-line"></div><div class="step done"><div class="step-dot">✓</div></div><div class="step-line"></div><div class="step done"><div class="step-dot">✓</div></div><div class="step-line"></div><div class="step done"><div class="step-dot">✓</div></div><div class="step-line"></div><div class="step active"><div class="step-dot">5</div><span class="step-lbl" data-tr="XAI Ağı" data-en="XAI Network">XAI Ağı</span></div></div>
+
+  <div class="intro-card" style="margin-bottom:16px">
+    <div class="intro-tag" data-tr="XAI Açıklama Ağı" data-en="XAI Explanation Network">XAI Açıklama Ağı</div>
+    <h1 style="font-size:1.35rem" data-tr="Girdileriniz Risk Çıktılarına Nasıl Bağlanıyor?" data-en="How Do Your Inputs Connect to Risk Outputs?">Girdileriniz Risk Çıktılarına Nasıl Bağlanıyor?</h1>
+    <p data-tr="Bir düğüme tıklayarak nedensellik zincirini keşfet. Kırmızı oklar riski artırıyor, yeşil oklar azaltıyor." data-en="Click a node to explore the causality chain. Red edges increase risk, green edges reduce it."><span data-tr="Bir düğüme tıklayarak nedensellik zincirini keşfet." data-en="Click a node to explore the causality chain.">Bir düğüme tıklayarak nedensellik zincirini keşfet.</span></p>
+  </div>
+
+  <div class="net-wrap">
+    <div class="net-toolbar">
+      <span style="font-size:.72rem;font-weight:700;color:var(--text2);margin-right:4px" data-tr="Katman:" data-en="Layer:">Katman:</span>
+      <button class="net-layer-btn active" onclick="filterLayer('all',this)" data-tr="Tümü" data-en="All">Tümü</button>
+      <button class="net-layer-btn" onclick="filterLayer('input',this)" data-tr="Girdiler" data-en="Inputs">Girdiler</button>
+      <button class="net-layer-btn" onclick="filterLayer('mechanism',this)" data-tr="Mekanizmalar" data-en="Mechanisms">Mekanizmalar</button>
+      <button class="net-layer-btn" onclick="filterLayer('output',this)" data-tr="Çıktılar" data-en="Outputs">Çıktılar</button>
+    </div>
+    <svg id="networkSvg" style="width:100%;height:520px;display:block"></svg>
+    <div class="net-legend">
+      <div class="net-leg-item"><div class="net-leg-dot" style="background:var(--accent)"></div><span data-tr="Girdi faktörü" data-en="Input factor">Girdi faktörü</span></div>
+      <div class="net-leg-item"><div class="net-leg-dot" style="background:var(--warn)"></div><span data-tr="Biyolojik mekanizma" data-en="Biological mechanism">Biyolojik mekanizma</span></div>
+      <div class="net-leg-item"><div class="net-leg-dot" style="background:var(--danger)"></div><span data-tr="Risk çıktısı" data-en="Risk output">Risk çıktısı</span></div>
+      <div class="net-leg-item"><div class="net-leg-dot" style="background:var(--accent2)"></div><span data-tr="Koruyucu çıktı" data-en="Protective output">Koruyucu çıktı</span></div>
+    </div>
+  </div>
+
+  <div class="path-panel" id="pathPanel">
+    <div class="path-title">🔗 <span data-tr="Seçili Yol — Nedensellik Zinciri" data-en="Selected Path — Causality Chain">Seçili Yol</span></div>
+    <div class="path-chain" id="pathChain"><span class="path-empty" data-tr="Bir düğüme tıkla →" data-en="Click a node →">Bir düğüme tıkla →</span></div>
+  </div>
+
+  <div style="text-align:center"><button class="btn-secondary" onclick="showPage('page-twin')"><span data-tr="← İkiz Evrimi" data-en="← Twin Evolution">← İkiz Evrimi</span></button></div>
+</div>
+</div>
+
+<div class="net-tooltip" id="netTooltip"></div>
+
+<!-- ══════════ SCRIPTS ══════════ -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+<script>
+'use strict';
+// ─────────────────────────────────────────────
+// LANGUAGE
+// ─────────────────────────────────────────────
+let lang='tr';
+function setLang(l){
+  lang=l;
+  document.querySelectorAll('.aff-tr').forEach(el=>el.style.display=l==='tr'?'':'none');
+  document.querySelectorAll('.aff-en').forEach(el=>el.style.display=l==='en'?'':'none');
+  document.querySelectorAll('.lang-btn').forEach(b=>b.classList.toggle('active',b.textContent.trim().toLowerCase()===l));
+  document.querySelectorAll('[data-tr]').forEach(el=>el.textContent=el.getAttribute('data-'+l));
+  if(l==='tr'){document.getElementById('f-name').placeholder='Adınızı ve soyadınızı giriniz';document.getElementById('f-age').placeholder='ör. 35';document.getElementById('f-height').placeholder='ör. 175';document.getElementById('f-weight').placeholder='ör. 75';document.getElementById('hSub').textContent='Açıklanabilir YZ · Dijital İkiz Simülasyonu';document.getElementById('btnSubmit').textContent='Dijital İkizimi Oluştur ve Analiz Et →';}
+  else{document.getElementById('f-name').placeholder='Enter your full name';document.getElementById('f-age').placeholder='e.g. 35';document.getElementById('f-height').placeholder='e.g. 175';document.getElementById('f-weight').placeholder='e.g. 75';document.getElementById('hSub').textContent='Explainable AI · Digital Twin Simulation';document.getElementById('btnSubmit').textContent='Create My Digital Twin & Analyze →';}
+  // Update ref modal if open
+  if(document.getElementById('refModalOverlay').classList.contains('open')){
+    openRefModal();
+  }
+  if(currentData){
+    if(document.getElementById('page-result').classList.contains('active'))renderResult(currentData);
+    
+    if(document.getElementById('page-twin').classList.contains('active'))renderTwinPage();
+  }
+}
+
+// ─────────────────────────────────────────────
+// HELPERS
+// ─────────────────────────────────────────────
+let currentData=null;
+const getR=n=>{const e=document.querySelector(`input[name="${n}"]:checked`);return e?e.value:null;};
+const getCB=n=>[...document.querySelectorAll(`input[name="${n}"]:checked`)].map(e=>e.value);
+const riskLv=s=>s<25?'low':s<55?'medium':'high';
+const riskLbl=s=>lang==='tr'?{low:'Düşük',medium:'Orta',high:'Yüksek'}[riskLv(s)]:{low:'Low',medium:'Moderate',high:'High'}[riskLv(s)];
+const T=(t,e)=>lang==='tr'?t:e;
+
+// ─────────────────────────────────────────────
+// SCORING ENGINE (expanded)
+// ─────────────────────────────────────────────
+function computeScores(r){
+  const age=parseInt(r.age)||40, h=parseFloat(r.height)||170, w=parseFloat(r.weight)||70;
+  const bmi=w/((h/100)**2);
+  const bmiS=bmi<18.5?.35:bmi<25?0:bmi<30?.3:bmi<35?.6:.9;
+
+  const sm=parseFloat(r.smoking||0);
+  const al=parseFloat(r.alcohol||0);
+  const act=parseFloat(r.activity||0);
+  const diet=parseFloat(r.diet||0.5);
+  const steps=parseFloat(r.steps||0.5);
+  const sl=parseFloat(r.sleep||1);
+  const st=parseFloat(r.stress||0);
+  const mo=parseFloat(r.mood||0);
+  const soc=parseFloat(r.social||1);
+  const sit=parseFloat(r.sitting||0);
+  const wat=parseFloat(r.water||0.5);
+
+  const bpS={normal:0,high:.75,low:.2,unknown:.12}[r.bp]||0;
+  const cholS={normal:0,high:.6,unknown:.1}[r.chol]||0;
+  const glS={normal:0,prediabetes:.5,diabetes:.85,unknown:.1}[r.glucose]||0;
+  const hxS={none:0,cardio:.55,metabolic:.45,respiratory:.3,other:.25}[r.hx]||0;
+  const ageS=age<25?0:age<35?.1:age<45?.22:age<55?.38:age<65?.55:.72;
+
+  // medication effects
+  const meds=r.meds||[];
+  let medCV=0, medMet=0, medGen=0;
+  if(meds.includes('bp'))    {medCV-=.15;}
+  if(meds.includes('betablocker')){medCV-=.12;}
+  if(meds.includes('statin')){medCV-=.18;cholS*=.4;}
+  if(meds.includes('aspirin')){medCV-=.08;}
+  if(meds.includes('metformin')){medMet-=.2;}
+  if(meds.includes('insulin')){medMet-=.1;}
+  if(meds.includes('thyroid')){medMet-=.1;}
+  if(meds.includes('anticoag')){medCV-=.1;}
+  if(meds.includes('psych'))  {medGen+=.1;}
+  if(meds.includes('nsaid'))  {medCV+=.08;medGen+=.05;}
+  if(meds.includes('biologic')){medGen-=.08;}
+  if(meds.includes('inhaler')){medGen-=.05;}
+  if(meds.includes('vitamins')){medGen-=.08;medMet-=.05;}
+
+  const famhx=r.famhx||[];
+  const famS=(famhx.includes('none')?0:0)+
+    (famhx.includes('heart')?.28:0)+(famhx.includes('diabetes')?.22:0)+
+    (famhx.includes('cancer')?.12:0)+(famhx.includes('hypertension')?.18:0)+
+    (famhx.includes('stroke')?.2:0);
+
+  // CARDIOVASCULAR
+  const cvRaw=
+    ageS*16 + bpS*20 + sm*22 + bmiS*10 + al*7 + (1-act)*9 +
+    (1-diet)*6 + (1-steps)*4 + cholS*12 + famS*8 + hxS*6 +
+    sit*4 + (1-soc)*3 + medCV*20;
+  const cvScore=Math.max(3,Math.min(99,Math.round(cvRaw)));
+
+  // METABOLIC
+  const metRaw=
+    bmiS*22 + glS*20 + ageS*8 + (1-act)*12 + (1-diet)*10 +
+    st*7 + (sl<1?.5*6:0) + famS*7 + hxS*8 + (1-steps)*5 +
+    (1-wat)*4 + medMet*20;
+  const metScore=Math.max(3,Math.min(99,Math.round(metRaw)));
+
+  // GENERAL WELLNESS
+  const genRaw=
+    st*18 + mo*14 + (1-soc)*10 + (1-act)*10 + (sl<1?.5*8:0) +
+    sm*8 + al*5 + sit*5 + (1-wat)*4 + (1-diet)*5 + medGen*20;
+  const genScore=Math.max(3,Math.min(99,Math.round(genRaw)));
+
+  // IMMUNE
+  const immRaw=
+    st*14 + mo*10 + (sl<0.5?8:0) + sm*10 + al*6 + (1-diet)*8 +
+    (1-soc)*6 + (1-wat)*5 + ageS*8;
+  const immScore=Math.max(3,Math.min(99,Math.round(immRaw)));
+
+  // Factor contributions for XAI bars
+  const maxRaw=Math.max(ageS*16,bpS*20,sm*22,bmiS*10,al*7,(1-act)*9,(1-diet)*6,cholS*12,famS*8,hxS*6,glS*20,1);
+  const factors=[
+    {key:'smoking', icon:'🚬', delta:Math.round(sm*22),         pos:sm>0},
+    {key:'bp',      icon:'💓', delta:Math.round(bpS*20),        pos:bpS>0},
+    {key:'glucose', icon:'🩸', delta:Math.round(glS*20),        pos:glS>0},
+    {key:'chol',    icon:'🧪', delta:Math.round(cholS*12),      pos:cholS>0},
+    {key:'bmi',     icon:'⚖️', delta:Math.round(bmiS*10),       pos:bmiS>0.2},
+    {key:'age',     icon:'🎂', delta:Math.round(ageS*16),       pos:true},
+    {key:'activity',icon:'🏃', delta:Math.round(act*9),         pos:false},
+    {key:'diet',    icon:'🥗', delta:Math.round(diet*6),        pos:false},
+    {key:'stress',  icon:'😤', delta:Math.round(st*18),         pos:st>0.2},
+    {key:'mood',    icon:'😔', delta:Math.round(mo*14),         pos:mo>0.2},
+    {key:'social',  icon:'🤝', delta:Math.round(soc*10),        pos:false},
+    {key:'family',  icon:'🧬', delta:Math.round(famS*8),        pos:famS>0},
+    {key:'sitting', icon:'💺', delta:Math.round(sit*4),         pos:sit>0.2},
+    {key:'water',   icon:'💧', delta:Math.round(wat*4),         pos:false},
+  ];
+  return {cvScore,metScore,genScore,immScore,bmi:bmi.toFixed(1),factors,maxRaw,raw:r};
+}
+
+// ─────────────────────────────────────────────
+// FORM SUBMIT
+// ─────────────────────────────────────────────
+async function submitForm(){
+  const name=document.getElementById('f-name').value.trim();
+  const age=document.getElementById('f-age').value;
+  const height=document.getElementById('f-height').value;
+  const weight=document.getElementById('f-weight').value;
+  if(!name){alert(T('Lütfen adınızı giriniz.','Please enter your name.'));return;}
+  if(!age){alert(T('Lütfen yaşınızı giriniz.','Please enter your age.'));return;}
+  if(!height||!weight){alert(T('Boy ve kilo bilgilerini giriniz.','Please enter height and weight.'));return;}
+
+  const raw={name,age,height,weight,
+    bp:getR('bp'),chol:getR('chol'),glucose:getR('glucose'),
+    smoking:getR('smoking'),alcohol:getR('alcohol'),activity:getR('activity'),
+    diet:getR('diet'),steps:getR('steps'),sleep:getR('sleep'),
+    stress:getR('stress'),mood:getR('mood'),social:getR('social'),
+    sitting:getR('sitting'),water:getR('water'),
+    hx:getR('hx'),meds:getCB('meds'),famhx:getCB('famhx'),
+    timestamp:new Date().toLocaleTimeString('tr-TR')};
+
+  const scores=computeScores(raw);
+  currentData={...scores,name,raw};
+
+  // Reset twin animation state
+  twinElapsedDays=0; isPlaying=false;
+  document.getElementById('playBtn').textContent='▶';
+
+  const btn=document.getElementById('btnSubmit');
+  btn.disabled=true; btn.textContent=T('Kaydediliyor...','Saving...');
+  try{
+    await fetch('/api/submit',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({name,age:parseInt(age),height:parseFloat(height),weight:parseFloat(weight),
+        bp:raw.bp,chol:raw.chol,glucose:raw.glucose,
+        smoking:raw.smoking,alcohol:raw.alcohol,activity:raw.activity,
+        diet:raw.diet,steps:raw.steps,sleep:raw.sleep,
+        stress:raw.stress,mood:raw.mood,social:raw.social,
+        sitting:raw.sitting,water:raw.water,
+        hx:raw.hx,meds:raw.meds,famhx:raw.famhx,
+        cvScore:scores.cvScore,metScore:scores.metScore,
+        genScore:scores.genScore,immScore:scores.immScore,bmi:scores.bmi})});
+  }catch(e){console.warn('Backend offline, continuing locally.');}
+  btn.disabled=false; btn.textContent=T('Dijital İkizimi Oluştur ve Analiz Et →','Create My Digital Twin & Analyze →');
+
+  renderResult(currentData);
+  showPage('page-result');
+}
+
+// ─────────────────────────────────────────────
+// RESULT PAGE
+// ─────────────────────────────────────────────
+function renderResult(data){
+  document.getElementById('rName').textContent=data.name;
+  document.getElementById('rSub').textContent=T('XAI Risk Analiz Raporu · Dijital İkiz','XAI Risk Analysis Report · Digital Twin');
+  document.getElementById('bmiNote').textContent=`BMI: ${data.bmi}`;
+
+  const lbls=T(['KARDİYOVASKÜLER','METABOLİK','GENEL İYİLİK'],['CARDIOVASCULAR','METABOLIC','GENERAL WELLNESS']);
+  const scoreExplains={
+    tr:[
+      (s,d)=>`Kalp-damar risk skoru. ${s>=55?'⚠️ Yüksek risk — sigara, tansiyon ve kolesterol başlıca sürücüler.':s>=25?'Orta düzey risk — yaşam tarzı faktörleri belirleyici.':'Düşük risk — mevcut profil koruyucu.'}`,
+      (s,d)=>`Metabolik risk skoru. ${s>=55?'⚠️ Yüksek — BMI, kan şekeri ve aktivite düzeyi odak noktaları.':s>=25?'Dikkat gerektiren seviye — beslenme ve aktivite kritik.':'Metabolik profil dengeli görünüyor.'}`,
+      (s,d)=>`Genel iyilik skoru. ${s>=55?'⚠️ Stres, ruh hali ve sosyal faktörler baskı oluşturuyor.':s>=25?'Psikolojik ve sosyal faktörler takip edilmeli.':'İyilik hali güçlü — koruyucu faktörler baskın.'}`
+    ],
+    en:[
+      (s,d)=>`Cardiovascular risk score. ${s>=55?'⚠️ High risk — smoking, blood pressure and cholesterol are the main drivers.':s>=25?'Moderate risk — lifestyle factors are decisive.':'Low risk — current profile is protective.'}`,
+      (s,d)=>`Metabolic risk score. ${s>=55?'⚠️ High — BMI, blood sugar and activity level are key focus areas.':s>=25?'Requires attention — diet and activity are critical.':'Metabolic profile looks balanced.'}`,
+      (s,d)=>`General wellness score. ${s>=55?'⚠️ Stress, mood and social factors are creating pressure.':s>=25?'Psychological and social factors should be monitored.':'Wellness is strong — protective factors dominant.'}`
+    ]
+  };
+  const seArr=scoreExplains[lang]||scoreExplains.tr;
+  document.getElementById('scoreGrid').innerHTML=[data.cvScore,data.metScore,data.genScore].map((s,i)=>`
+    <div class="score-card ${riskLv(s)}">
+      <div class="score-lbl">${lbls[i]}</div>
+      <div class="score-val">${s}</div>
+      <span class="score-badge badge-${riskLv(s)}">${riskLbl(s)}</span>
+      <div class="score-explain">${seArr[i](s,data)}</div>
+    </div>`).join('');
+
+  document.getElementById('dtTitle').textContent=T(`${data.name} — Dijital İkiziniz Oluşturuldu`,`${data.name} — Your Digital Twin Created`);
+  document.getElementById('dtDesc').textContent=T('Verileriniz yaşayan bir sanal model haline getirildi. Zaman evrimi ve ilaç/müdahale senaryoları bu model üzerinde simüle edilebilir.','Your data has been transformed into a living virtual model. Time evolution and intervention scenarios can be simulated on this model.');
+
+  const fnames={
+    smoking:{tr:'Sigara',en:'Smoking'},bp:{tr:'Kan basıncı',en:'Blood pressure'},
+    glucose:{tr:'Kan şekeri / diyabet',en:'Blood glucose / diabetes'},
+    chol:{tr:'Kolesterol',en:'Cholesterol'},bmi:{tr:'BMI',en:'BMI'},
+    age:{tr:'Yaş',en:'Age'},activity:{tr:'Fiziksel aktivite',en:'Physical activity'},
+    diet:{tr:'Beslenme kalitesi',en:'Diet quality'},stress:{tr:'Stres',en:'Stress'},
+    mood:{tr:'Ruh hali',en:'Mood'},social:{tr:'Sosyal bağlantı',en:'Social connection'},
+    family:{tr:'Aile geçmişi',en:'Family history'},sitting:{tr:'Oturma süresi',en:'Sitting time'},
+    water:{tr:'Su tüketimi',en:'Water intake'}
+  };
+  const fexplains={
+    smoking:{tr:'KV riske en yüksek katkıyı sağlar. Endotel hasarı ve ateroskleroz mekanizmasıyla çalışır.',en:'Highest single contributor to CV risk. Works via endothelial damage and atherosclerosis.'},
+    bp:{tr:'Yüksek tansiyon kalp ve damar duvarlarına doğrudan baskı uygular.',en:'High BP applies direct pressure on heart and vessel walls.'},
+    glucose:{tr:'Kronik hiperglisemi damar sertliğine ve nöropati riskine yol açar.',en:'Chronic hyperglycemia leads to vascular stiffness and neuropathy risk.'},
+    chol:{tr:'Yüksek LDL kolesterol plak birikimini ve tıkanma riskini artırır.',en:'High LDL raises plaque buildup and occlusion risk.'},
+    bmi:{tr:'Fazla kilo insülin direncini, inflamasyonu ve kan basıncını olumsuz etkiler.',en:'Excess weight negatively affects insulin resistance, inflammation and BP.'},
+    age:{tr:'Yaş ile birlikte damar esnekliği azalır, kümülatif hasar birikir.',en:'Vascular elasticity decreases with age, cumulative damage accumulates.'},
+    activity:{tr:'Düzenli egzersiz tüm risk boyutlarını iyileştiren en güçlü koruyucu faktördür.',en:'Regular exercise is the strongest protective factor across all risk dimensions.'},
+    diet:{tr:'Akdeniz tipi beslenme inflamasyonu azaltır, lipid profilini düzenler.',en:'Mediterranean diet reduces inflammation and regulates lipid profile.'},
+    stress:{tr:'Kortizol yüksekliği kan şekeri, uyku ve bağışıklık üzerinde zincirleme etki yaratır.',en:'Elevated cortisol creates chain effects on blood sugar, sleep and immunity.'},
+    mood:{tr:'Psikolojik tükenme HPA eksenini aktive ederek fizyolojik baskı oluşturur.',en:'Psychological burnout activates the HPA axis, creating physiological pressure.'},
+    social:{tr:'Güçlü sosyal bağ kortizolü düşürür; izolasyon ise kronik inflamasyonla ilişkilidir.',en:'Strong social bonds lower cortisol; isolation correlates with chronic inflammation.'},
+    family:{tr:'Genetik yatkınlık değiştirilemez ama diğer faktörlerle dengelenebilir.',en:'Genetic predisposition is unchangeable but can be balanced with other factors.'},
+    sitting:{tr:'Uzun süreli hareketsizlik metabolik yavaşlamaya ve damar sağlığına etki eder.',en:'Prolonged inactivity affects metabolic rate and vascular health.'},
+    water:{tr:'Yeterli hidrasyon metabolizma, böbrek ve enerji dengesi için temel koşuldur.',en:'Adequate hydration is essential for metabolism, kidney function and energy.'},
+  };
+  document.getElementById('factorList').innerHTML=data.factors.map(f=>{
+    const pct=Math.round((f.delta/Math.max(data.maxRaw,1))*100);
+    const ex=fexplains[f.key]?.[lang]||fexplains[f.key]?.tr||'';
+    return `<div class="factor-row" style="flex-wrap:wrap">
+      <span class="fi">${f.icon}</span>
+      <span class="fn">${fnames[f.key]?.[lang]||f.key}</span>
+      <div class="fbar-wrap"><div class="fbar ${f.pos?'bar-pos':'bar-neg'}" style="width:${pct}%"></div></div>
+      <span class="fdelta ${f.pos?'dpos':'dneg'}">${f.pos?'+':'−'}${f.delta}</span>
+      <span class="fdir">${f.pos?'↑':'↓'}</span>
+      ${ex?`<div class="factor-explain" style="width:100%;padding-left:36px">${ex}</div>`:''}
+    </div>`;}).join('');
+
+  const trusts=[
+    T('✅ Sigara kullanımı riski artırıyor → Beklenen yön ✓','✅ Smoking increases risk → Expected direction ✓'),
+    T('✅ Fiziksel aktivite riski azaltıyor → Beklenen yön ✓','✅ Physical activity reduces risk → Expected direction ✓'),
+    T('✅ Yaş arttıkça risk artıyor → Beklenen yön ✓','✅ Risk increases with age → Expected direction ✓'),
+    T('✅ Yüksek BMI & kan şekeri riski artırıyor → Beklenen yön ✓','✅ High BMI & glucose increase risk → Expected direction ✓'),
+    T('✅ Akdeniz diyeti riski azaltıyor → Beklenen yön ✓','✅ Mediterranean diet reduces risk → Expected direction ✓'),
+    T('✅ Statin/tansiyon ilaçları KV riski düşürüyor → İlaç-model entegrasyonu ✓','✅ Statin/BP meds reduce CV risk → Drug-model integration ✓'),
+    T('ℹ️ Her faktörün yönü ve büyüklüğü denetlenebilir — model şeffaf.','ℹ️ Direction and magnitude of each factor is auditable — model is transparent.')
+  ];
+  document.getElementById('trustList').innerHTML=trusts.map(t=>`<div class="trust-check"><span>${t}</span></div>`).join('');
+
+  // "Ne anlama geliyor?" panel
+  const wp=document.getElementById('whatPanel');
+  if(wp){
+    const rows=[
+      {icon:'❤️',title:T('Kardiyovasküler Risk (KV)','Cardiovascular Risk (CV)'),
+       desc:T('Kalp krizi, inme ve damar hastalığı olasılığını tahmin eder. Sigara, kan basıncı, kolesterol, yaş ve aile geçmişi bu skoru en çok etkiler.','Estimates probability of heart attack, stroke and vascular disease. Smoking, BP, cholesterol, age and family history are the top drivers.'),
+       formula:T('KV = f(yaş, KB, sigara, BMI, kolesterol, aile, ilaçlar, aktivite, beslenme)','CV = f(age, BP, smoking, BMI, cholesterol, family, meds, activity, diet)')},
+      {icon:'🩺',title:T('Metabolik Risk','Metabolic Risk'),
+       desc:T('Diyabet, insülin direnci ve metabolik sendrom eğilimini ölçer. BMI, kan şekeri ve fiziksel aktivite belirleyici faktörlerdir.','Measures tendency toward diabetes, insulin resistance and metabolic syndrome. BMI, blood glucose and physical activity are the key factors.'),
+       formula:T('Met = f(BMI, glukoz, aktivite, beslenme, stres, aile)','Met = f(BMI, glucose, activity, diet, stress, family)')},
+      {icon:'🧠',title:T('Genel İyilik','General Wellness'),
+       desc:T('Ruhsal, sosyal ve davranışsal sağlık bütününü yansıtır. Stres, ruh hali, uyku ve sosyal bağlantı bu skoru şekillendirir.','Reflects the whole of mental, social and behavioral health. Stress, mood, sleep and social connection shape this score.'),
+       formula:T('Genel = f(stres, ruh hali, sosyal, uyku, aktivite, alkol)','General = f(stress, mood, social, sleep, activity, alcohol)')},
+      {icon:'🛡️',title:T('Bağışıklık','Immunity'),
+       desc:T('Bağışıklık sisteminin genel direncini tahmin eder. Stres, uyku, sigara ve beslenme kalitesi en kritik girdilerdir.','Estimates overall immune system resilience. Stress, sleep, smoking and diet quality are the most critical inputs.'),
+       formula:T('Bağışıklık = f(stres, uyku, sigara, beslenme, su, sosyal, yaş)','Immunity = f(stress, sleep, smoking, diet, water, social, age)')},
+    ];
+    wp.innerHTML=rows.map(r=>`<div class="what-row">
+      <div class="what-icon">${r.icon}</div>
+      <div>
+        <div class="what-title">${r.title}</div>
+        <div class="what-desc">${r.desc}</div>
+        <div class="what-formula">${r.formula}</div>
+      </div>
+    </div>`).join('');
+  }
+}
+
+// ─────────────────────────────────────────────
+// SIMULATION PAGE
+// ─────────────────────────────────────────────
+
+
+
+
+// ─────────────────────────────────────────────
+// TWIN PAGE
+// ─────────────────────────────────────────────
+const TL=[
+  {k:'now',   tr:'Şimdi',  en:'Now',      days:0},
+  {k:'1w',    tr:'1 Hafta',en:'1 Week',   days:7},
+  {k:'1m',    tr:'1 Ay',   en:'1 Month',  days:30},
+  {k:'3m',    tr:'3 Ay',   en:'3 Mo.',    days:90},
+  {k:'6m',    tr:'6 Ay',   en:'6 Mo.',    days:180},
+  {k:'1y',    tr:'1 Yıl',  en:'1 Year',   days:365},
+  {k:'3y',    tr:'3 Yıl',  en:'3 Years',  days:1095},
+  {k:'5y',    tr:'5 Yıl',  en:'5 Years',  days:1825},
+  {k:'10y',   tr:'10 Yıl', en:'10 Yrs',   days:3650},
+];
+const SC_FIELDS=[
+  {k:'smoking', tr:'Sigara',en:'Smoking',opts:[[0,'Yok/None'],[0.4,'Bıraktım/Former'],[0.7,'Hafif/Light'],[1,'Yoğun/Heavy']]},
+  {k:'activity',tr:'Aktivite',en:'Activity',opts:[[0,'Hareketsiz/Sedentary'],[0.4,'Hafif/Light'],[0.7,'Orta/Moderate'],[1,'Aktif/Active']]},
+  {k:'diet',    tr:'Beslenme',en:'Diet',opts:[[0,'Kötü/Poor'],[0.5,'Orta/Mixed'],[1,'İyi/Good']]},
+  {k:'stress',  tr:'Stres',en:'Stress',opts:[[0,'Düşük/Low'],[0.5,'Orta/Moderate'],[0.8,'Yüksek/High'],[1,'Kronik/Chronic']]},
+  {k:'sleep',   tr:'Uyku',en:'Sleep',opts:[[0,'<5s/<5h'],[0.4,'5-6s/5-6h'],[1,'6-8s (ideal)'],[0.6,'8+s/8+h']]},
+  {k:'mood',    tr:'Ruh Hali',en:'Mood',opts:[[0,'İyi/Good'],[0.4,'Değişken/Variable'],[0.7,'Mutsuz/Unhappy'],[1,'Tükenmiş/Burnout']]},
+  {k:'social',  tr:'Sosyal',en:'Social',opts:[[1,'Güçlü/Strong'],[0.5,'Orta/Moderate'],[0,'Yalnız/Lonely']]},
+  {k:'alcohol', tr:'Alkol',en:'Alcohol',opts:[[0,'Yok/None'],[0.3,'Nadiren/Rarely'],[0.6,'Haftalık/Weekly'],[1,'Günlük/Daily']]},
+  {k:'water',   tr:'Su',en:'Water',opts:[[0,'<1L'],[0.5,'1-2L'],[1,'2+L']]},
+];
+
+let twinScenario={};
+let twinElapsedDays=0;
+let isPlaying=false;
+let playTimer=null;
+let speedDaysPerSec=30; // default 1s=1mo
+
+const SPEEDS={realtime:0.0001,month:30,year:365,decade:3650};
+
+function goTwin(){
+  if(!currentData)return;
+  SC_FIELDS.forEach(f=>{twinScenario[f.k]=currentData.raw[f.k]||f.opts[0][0];});
+  twinElapsedDays=0;
+  renderTwinPage();
+  showPage('page-twin');
+}
+
+function renderTwinPage(){
+  buildTlPoints();
+  buildScGrid();
+  updateTwinAt(twinElapsedDays);
+  drawTwinChart();
+}
+
+function buildTlPoints(){
+  document.getElementById('tlPoints').innerHTML=TL.map((tp,i)=>`
+    <div class="tl-pt" id="tlp-${i}" onclick="jumpTo(${i})">
+      <div class="tl-dot"></div>
+      <span class="tl-lbl">${tp[lang]||tp.tr}</span>
+    </div>`).join('');
+  highlightTlPoint();
+}
+
+function buildScGrid(){
+  document.getElementById('scGrid').innerHTML=SC_FIELDS.map(f=>`
+    <div class="sc-field">
+      <label>${f[lang==='tr'?'tr':'en']}</label>
+      <div class="sc-pills" id="sc-${f.k}">${f.opts.map(([v,lbl])=>{
+        const l=lbl.split('/')[lang==='tr'?0:1]||lbl;
+        return `<button class="sc-pill ${twinScenario[f.k]==v?'active':''}" onclick="setTwinScenario('${f.k}','${v}',this,'sc-${f.k}')">${l}</button>`;}).join('')}
+      </div>
+    </div>`).join('');
+}
+
+function setTwinScenario(k,v,btn,gid){
+  document.querySelectorAll(`#${gid} .sc-pill`).forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  twinScenario[k]=v;
+  updateTwinAt(twinElapsedDays);
+  drawTwinChart();
+}
+
+function setSpeed(key,btn){
+  speedDaysPerSec=SPEEDS[key];
+  document.querySelectorAll('.speed-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+function togglePlay(){
+  isPlaying=!isPlaying;
+  document.getElementById('playBtn').textContent=isPlaying?'⏸':'▶';
+  if(isPlaying)animateTwin();
+  else{clearTimeout(playTimer);}
+}
+
+function animateTwin(){
+  if(!isPlaying)return;
+  twinElapsedDays+=speedDaysPerSec/30; // ~30fps target
+  if(twinElapsedDays>TL[TL.length-1].days){
+    twinElapsedDays=TL[TL.length-1].days;
+    isPlaying=false;
+    document.getElementById('playBtn').textContent='▶';
+  }
+  updateTwinAt(twinElapsedDays);
+  highlightTlPoint();
+  updateTlFill();
+  playTimer=setTimeout(animateTwin,33);
+}
+
+function jumpTo(idx){
+  twinElapsedDays=TL[idx].days;
+  highlightTlPoint();
+  updateTlFill();
+  updateTwinAt(twinElapsedDays);
+}
+
+function highlightTlPoint(){
+  const cur=TL.reduce((best,tp,i)=>Math.abs(tp.days-twinElapsedDays)<Math.abs(TL[best].days-twinElapsedDays)?i:best,0);
+  document.querySelectorAll('.tl-pt').forEach((el,i)=>el.classList.toggle('active',i===cur));
+}
+
+function updateTlFill(){
+  const pct=(twinElapsedDays/TL[TL.length-1].days)*100;
+  document.getElementById('tlFill').style.width=Math.min(pct,100)+'%';
+}
+
+// Compute scores with time drift
+function scoresAt(days){
+  const r={...currentData.raw,...twinScenario};
+  const base=computeScores(r);
+  const sm=parseFloat(twinScenario.smoking||0);
+  const act=parseFloat(twinScenario.activity||0);
+  const diet=parseFloat(twinScenario.diet||0.5);
+  const st=parseFloat(twinScenario.stress||0);
+  const al=parseFloat(twinScenario.alcohol||0);
+  const sl=parseFloat(twinScenario.sleep||1);
+  const mo=parseFloat(twinScenario.mood||0);
+  const soc=parseFloat(twinScenario.social||1);
+  const wat=parseFloat(twinScenario.water||0.5);
+  const yrs=days/365;
+
+  // annual compounding drift per dimension
+  const cvD =((sm*4.5)+(1-act)*3+(1-diet)*2.5+al*2+(1-soc)*1.5)*yrs*(1-base.cvScore/110);
+  const metD=((1-diet)*3.5+(1-act)*3.5+st*2+al*1.5+(sl<0.5?2:0))*yrs*(1-base.metScore/110);
+  const genD=(st*3.5+mo*3+(1-soc)*2+(1-act)*2+(sl<0.5?2:0)+al*1)*yrs*(1-base.genScore/110);
+  const immD=(st*2+mo*2+sm*2+al*1.5+(1-diet)*2+(1-wat)*1.5)*yrs*(1-base.immScore/110);
+  return{
+    cv: Math.max(3,Math.min(99,Math.round(base.cvScore+cvD))),
+    met:Math.max(3,Math.min(99,Math.round(base.metScore+metD))),
+    gen:Math.max(3,Math.min(99,Math.round(base.genScore+genD))),
+    imm:Math.max(3,Math.min(99,Math.round(base.immScore+immD))),
+  };
+}
+
+function updateTwinAt(days){
+  if(!currentData)return;
+  const s=scoresAt(days);
+  const s0=scoresAt(0);
+  const yrs=days/365;
+  const bioAge=Math.round(parseInt(currentData.raw.age)+yrs*(0.5+(s.cv+s.met)/120));
+
+  // time label
+  let tlbl='';
+  if(days<1)tlbl=T('Şimdi (0. gün)','Now (Day 0)');
+  else if(days<7)tlbl=T(`${Math.round(days)}. gün`,`Day ${Math.round(days)}`);
+  else if(days<31)tlbl=T(`${Math.round(days/7)}. hafta`,`Week ${Math.round(days/7)}`);
+  else if(days<365)tlbl=T(`${Math.round(days/30)}. ay`,`Month ${Math.round(days/30)}`);
+  else tlbl=T(`${(days/365).toFixed(1)} yıl`,`${(days/365).toFixed(1)} years`);
+
+  document.getElementById('tlCurrent').innerHTML=T(`<strong>${tlbl}</strong> — KV: ${s.cv} | Met: ${s.met} | Genel: ${s.gen} | Bağışıklık: ${s.imm}`,`<strong>${tlbl}</strong> — CV: ${s.cv} | Met: ${s.met} | General: ${s.gen} | Immune: ${s.imm}`);
+
+  // silhouette
+  updateSilhouette(s,s0,bioAge,days);
+
+  // metrics
+  const mlbls=T(['KARDİYOVASKÜLER','METABOLİK','GENEL İYİLİK'],['CARDIOVASCULAR','METABOLIC','GENERAL WELLNESS']);
+  document.getElementById('twinMetrics').innerHTML=[s.cv,s.met,s.gen].map((v,i)=>{
+    const diff=v-[s0.cv,s0.met,s0.gen][i];
+    const dc=diff>2?'delta-up':diff<-2?'delta-dn':'delta-fl';
+    const ds=diff>2?`+${diff}`:diff<-2?`${diff}`:'—';
+    const bdr=v<25?'#10b981':v<55?'#f59e0b':'#ef4444';
+    return `<div class="tm-card" style="border-top:3px solid ${bdr}">
+      <div class="tm-lbl">${mlbls[i]}</div>
+      <div class="tm-val">${v}</div>
+      <span class="tm-delta ${dc}">${ds}</span>
+    </div>`;}).join('');
+
+  buildXaiNarrative(s,s0,days);
+}
+
+// ─── SILHOUETTE UPDATE ───
+function updateSilhouette(s,s0,bioAge,days){
+  if(!currentData)return;
+  const avg=(s.cv+s.met+s.gen)/3;
+  const name=document.getElementById('silName');
+  const status=document.getElementById('silStatus');
+  const age=document.getElementById('silAge');
+  const ageLbl=document.getElementById('silAgeLbl');
+  const timeEl=document.getElementById('silTime');
+
+  name.textContent=currentData.name;
+  age.textContent=bioAge;
+  ageLbl.textContent=T('Biyolojik Yaş','Biological Age');
+
+  const yrs=(days/365).toFixed(1);
+  timeEl.textContent=days<1?T('Şimdi','Now'):T(`${yrs} yıl sonra`,`After ${yrs} years`);
+
+  // Status
+  let statusTxt,statusStyle;
+  if(avg<22){statusTxt=T('✅ Sağlıklı','✅ Healthy');statusStyle='background:rgba(16,185,129,.18);color:#059669';}
+  else if(avg<40){statusTxt=T('🟡 İyi','🟡 Good');statusStyle='background:rgba(16,185,129,.1);color:#10b981';}
+  else if(avg<58){statusTxt=T('⚠️ Dikkatli','⚠️ Caution');statusStyle='background:rgba(245,158,11,.15);color:#d97706';}
+  else if(avg<75){statusTxt=T('🔴 Riskli','🔴 At Risk');statusStyle='background:rgba(239,68,68,.12);color:#dc2626';}
+  else{statusTxt=T('🚨 Kritik','🚨 Critical');statusStyle='background:rgba(239,68,68,.22);color:#b91c1c';}
+  status.textContent=statusTxt;
+  status.style.cssText=statusStyle+';padding:3px 12px;border-radius:100px;font-size:.72rem;font-weight:700';
+
+  // Organ coloring based on risk
+  const heartColor=s.cv<30?'#86efac':s.cv<55?'#fca5a5':s.cv<75?'#f87171':'#dc2626';
+  const liverColor=s.met<30?'#86efac':s.met<55?'#fed7aa':s.met<75?'#fb923c':'#ea580c';
+  const brainColor=s.gen<30?'#e9d5ff':s.gen<55?'#c4b5fd':s.gen<75?'#a78bfa':'#7c3aed';
+  const lungColor=s.imm<30?'#bfdbfe':s.imm<55?'#93c5fd':s.imm<75?'#60a5fa':'#2563eb';
+  const gutColor=s.met<30?'#d9f99d':s.met<55?'#bef264':s.met<75?'#a3e635':'#65a30d';
+
+  // body fill based on overall risk
+  const bodyColor=avg<35?'#e0f2fe':avg<55?'#fef9c3':avg<70?'#fee2e2':'#fecaca';
+  const strokeColor=avg<35?'#7dd3fc':avg<55?'#fde047':avg<70?'#fca5a5':'#f87171';
+
+  const setSvgFill=(id,fill,stroke,opacity)=>{
+    const el=document.getElementById(id);
+    if(!el)return;
+    if(fill)el.setAttribute('fill',fill);
+    if(stroke)el.setAttribute('stroke',stroke);
+    if(opacity!==undefined)el.setAttribute('opacity',opacity);
+  };
+  setSvgFill('sil-torso',bodyColor,strokeColor);
+  setSvgFill('sil-head',bodyColor,strokeColor);
+  setSvgFill('sil-heart',heartColor);
+  setSvgFill('sil-liver',liverColor);
+  setSvgFill('sil-brain',brainColor,.6);
+  setSvgFill('sil-lung-l',lungColor,.7);
+  setSvgFill('sil-lung-r',lungColor,.7);
+  setSvgFill('sil-gut',gutColor,.6);
+
+  // arm/leg color
+  ['sil-arm-l','sil-arm-r','sil-leg-l','sil-leg-r'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el)el.setAttribute('stroke',bodyColor);
+  });
+
+  // Pulse animation on heart (faster when high CV risk)
+  const p1=document.getElementById('sil-pulse1');
+  const p2=document.getElementById('sil-pulse2');
+  if(s.cv>55){
+    p1.setAttribute('stroke',heartColor);
+    p2.setAttribute('stroke',heartColor);
+    animatePulse(p1,p2,s.cv);
+  } else {
+    p1.setAttribute('opacity','0');p2.setAttribute('opacity','0');
+  }
+
+  // Belly growth with BMI/metabolic risk
+  const belly=document.getElementById('sil-belly');
+  if(s.met>55){
+    belly.setAttribute('fill','rgba(251,146,60,0.3)');
+    belly.setAttribute('stroke','#f97316');
+    belly.setAttribute('stroke-width','1.5');
+    belly.setAttribute('opacity','0.8');
+    belly.setAttribute('rx',22+Math.round((s.met-55)/5));
+  } else {
+    belly.setAttribute('opacity','0');
+  }
+}
+
+let pulsePhase=0;
+function animatePulse(p1,p2,cvScore){
+  pulsePhase+=0.15;
+  const o1=Math.max(0,(Math.sin(pulsePhase)*0.6+0.4));
+  const o2=Math.max(0,(Math.sin(pulsePhase-1)*0.4+0.2));
+  p1.setAttribute('opacity',o1.toFixed(2));
+  p2.setAttribute('opacity',o2.toFixed(2));
+}
+
+// ─── TWIN CHART ───
+function drawTwinChart(){
+  if(!currentData) return;
+  const canvas=document.getElementById('twinChart');
+  if(!canvas) return;
+  // Wait for layout if width not available yet
+  const W=Math.max(canvas.parentElement.clientWidth-44, 300);
+  const H=180;
+  canvas.width=W; canvas.height=H;
+  const ctx=canvas.getContext('2d');
+  ctx.clearRect(0,0,W,H);
+
+  const pad={l:32,r:14,t:12,b:26};
+  const cw=W-pad.l-pad.r, ch=H-pad.t-pad.b;
+  const n=TL.length;
+  const cvArr=[],metArr=[],genArr=[];
+  TL.forEach(tp=>{const s=scoresAt(tp.days);cvArr.push(s.cv);metArr.push(s.met);genArr.push(s.gen);});
+
+  // grid
+  ctx.strokeStyle='rgba(203,213,225,.45)'; ctx.lineWidth=1;
+  [0,25,50,75,100].forEach(y=>{
+    const py=pad.t+ch*(1-y/100);
+    ctx.beginPath();ctx.moveTo(pad.l,py);ctx.lineTo(pad.l+cw,py);ctx.stroke();
+    ctx.fillStyle='#94a3b8';ctx.font='9px Nunito';ctx.textAlign='right';
+    ctx.fillText(y,pad.l-4,py+3);
+  });
+  TL.forEach((tp,i)=>{
+    const px=pad.l+(i/(n-1))*cw;
+    ctx.fillStyle='#94a3b8';ctx.font='9px Nunito';ctx.textAlign='center';
+    ctx.fillText(tp[lang]||tp.tr,px,H-4);
+  });
+
+  // current time marker — guard against NaN
+  const maxDays=TL[n-1].days;
+  const curPct=maxDays>0?(twinElapsedDays/maxDays):0;
+  const safePct=isNaN(curPct)?0:Math.min(Math.max(curPct,0),1);
+  const curX=pad.l+safePct*cw;
+  ctx.strokeStyle='rgba(26,58,92,.25)';ctx.lineWidth=1.5;ctx.setLineDash([3,4]);
+  ctx.beginPath();ctx.moveTo(curX,pad.t);ctx.lineTo(curX,pad.t+ch);ctx.stroke();
+  ctx.setLineDash([]);
+
+  function drawLine(arr,color){
+    ctx.beginPath();ctx.strokeStyle=color;ctx.lineWidth=2.2;ctx.lineJoin='round';
+    arr.forEach((v,i)=>{
+      const px=pad.l+(i/(n-1))*cw,py=pad.t+ch*(1-Math.min(Math.max(v,0),100)/100);
+      i===0?ctx.moveTo(px,py):ctx.lineTo(px,py);
+    });
+    ctx.stroke();
+    // active point
+    const curI=safePct*(n-1);
+    const fl=Math.floor(curI),ce=Math.min(fl+1,n-1);
+    const frac=curI-fl;
+    const curV=arr[fl]+(arr[ce]-arr[fl])*frac;
+    const cy2=pad.t+ch*(1-Math.min(Math.max(curV,0),100)/100);
+    ctx.beginPath();ctx.arc(curX,cy2,5,0,Math.PI*2);
+    ctx.fillStyle=color;ctx.fill();
+    ctx.strokeStyle='#fff';ctx.lineWidth=1.5;ctx.stroke();
+  }
+  drawLine(cvArr,'#ef4444');
+  drawLine(metArr,'#f59e0b');
+  drawLine(genArr,'#0ea5c9');
+}
+
+// Continuous chart redraw during animation
+setInterval(()=>{
+  if(isPlaying)drawTwinChart();
+  // Also animate silhouette pulse continuously
+  if(currentData && document.getElementById('page-twin').classList.contains('active')){
+    const s=scoresAt(twinElapsedDays);
+    if(s.cv>55){
+      const p1=document.getElementById('sil-pulse1');
+      const p2=document.getElementById('sil-pulse2');
+      if(p1&&p2)animatePulse(p1,p2,s.cv);
+    }
+  }
+},33);
+
+// ─── XAI NARRATIVE ───
+function buildXaiNarrative(s,s0,days){
+  const yrs=days/365;
+  const sc=twinScenario;
+  const sm=parseFloat(sc.smoking||0);
+  const act=parseFloat(sc.activity||0);
+  const st=parseFloat(sc.stress||0);
+  const mo=parseFloat(sc.mood||0);
+  const diet=parseFloat(sc.diet||0.5);
+  const al=parseFloat(sc.alcohol||0);
+  const soc=parseFloat(sc.social||1);
+  const evs=[];
+
+  if(sm>0.3&&yrs>0){
+    const imp=Math.round(sm*4.5*yrs);
+    evs.push({t:'danger',i:'🚬',
+      title:T(`Sigara → +${imp} puan kümülatif KV artışı`,`Smoking → +${imp} pts cumulative CV increase`),
+      desc:T(`${(yrs).toFixed(1)} yıl boyunca sigara oksidatif stres ve endotel hasarı yaratıyor.`,`${(yrs).toFixed(1)} years of smoking creates oxidative stress and endothelial damage.`),
+      chain:T('Sigara → Endotel hasarı → İnflamasyon → Ateroskleroz → KV Risk ↑','Smoking → Endothelial damage → Inflammation → Atherosclerosis → CV Risk ↑')});
+  }
+  if(act>0.5&&yrs>0){
+    const prot=Math.round(act*3*yrs);
+    evs.push({t:'good',i:'🏃',
+      title:T(`Fiziksel aktivite → −${prot} puan koruyucu etki`,`Physical activity → −${prot} pts protective effect`),
+      desc:T('Düzenli egzersiz insülin duyarlılığını ve kardiyak kapasiteyi artırıyor.','Regular exercise improves insulin sensitivity and cardiac capacity.'),
+      chain:T('Egzersiz → İnsülin duyarlılığı ↑ → Kan basıncı ↓ → KV & Metabolik Risk ↓','Exercise → Insulin sensitivity ↑ → BP ↓ → CV & Metabolic Risk ↓')});
+  }
+  if(st>0.5&&yrs>0){
+    const imp=Math.round(st*3.5*yrs);
+    evs.push({t:'warn',i:'😤',
+      title:T(`Kronik stres → +${imp} puan metabolik baskı`,`Chronic stress → +${imp} pts metabolic pressure`),
+      desc:T('Uzun süreli yüksek kortizol kan şekerini düzensizleştiriyor, kardiyak yük artıyor.','Prolonged elevated cortisol dysregulates blood glucose and increases cardiac load.'),
+      chain:T('Stres → Kortizol ↑ → Kan şekeri ↑ → İnflamasyon → Metabolik & KV Risk ↑','Stress → Cortisol ↑ → Blood glucose ↑ → Inflammation → Metabolic & CV Risk ↑')});
+  }
+  if(diet>0.7&&yrs>0){
+    evs.push({t:'good',i:'🥗',
+      title:T('Akdeniz diyeti → Koruyucu etki','Mediterranean diet → Protective effect'),
+      desc:T('Antiinflamatuar besinler lipid profilini ve bağırsak mikrobiyomunu iyileştiriyor.','Anti-inflammatory foods improve lipid profile and gut microbiome.'),
+      chain:T('Sağlıklı beslenme → İnflamasyon ↓ → Lipid dengesi → KV & Metabolik Risk ↓','Healthy diet → Inflammation ↓ → Lipid balance → CV & Metabolic Risk ↓')});
+  }
+  if(soc<0.4&&yrs>0.5){
+    evs.push({t:'warn',i:'🤝',
+      title:T('Sosyal izolasyon → Genel iyilik gerilimi','Social isolation → General wellness pressure'),
+      desc:T('Yalnızlık kronik inflamasyon ve sempatik sinir sistemi aktivasyonuyla ilişkilidir.','Loneliness is linked to chronic inflammation and sympathetic nervous system activation.'),
+      chain:T('Yalnızlık → Kortizol ↑ → İmmün baskı → Genel İyilik ↓','Loneliness → Cortisol ↑ → Immune suppression → General Wellness ↓')});
+  }
+  if(mo>0.6&&yrs>0.5){
+    evs.push({t:'warn',i:'😔',
+      title:T('Düşük ruh hali → Hormonal baskı','Low mood → Hormonal suppression'),
+      desc:T('Kronik tükenme HPA eksenini aktive ediyor; uyku kalitesi ve bağışıklık zayıflıyor.','Chronic burnout activates the HPA axis; sleep quality and immunity decline.'),
+      chain:T('Tükenme → HPA akseni ↑ → Kortizol ↑ → Uyku ↓ → Bağışıklık ↓','Burnout → HPA axis ↑ → Cortisol ↑ → Sleep ↓ → Immunity ↓')});
+  }
+  if(al>0.5&&yrs>0){
+    evs.push({t:'warn',i:'🍷',
+      title:T('Alkol tüketimi → Karaciğer & metabolik baskı','Alcohol consumption → Liver & metabolic pressure'),
+      desc:T('Düzenli alkol karaciğer inflamasyonuna ve trigliserit artışına yol açıyor.','Regular alcohol leads to liver inflammation and triglyceride elevation.'),
+      chain:T('Alkol → Karaciğer inflamasyonu → Lipid dengesizliği → KV Risk ↑','Alcohol → Liver inflammation → Lipid imbalance → CV Risk ↑')});
+  }
+  if(evs.length===0){
+    evs.push({t:'good',i:'✅',
+      title:T('Mevcut yaşam tarzı sürdürülebilir görünüyor','Current lifestyle appears sustainable'),
+      desc:T('Bu zaman diliminde seçilen senaryoda belirgin bir risk artışı gözlenmiyor.','No significant risk increase observed at this time point under the selected scenario.'),
+      chain:''});
+  }
+  document.getElementById('xaiNarList').innerHTML=evs.map(e=>`
+    <div class="xai-ev ${e.t}">
+      <div class="xai-ev-icon">${e.i}</div>
+      <div>
+        <div class="xai-ev-title">${e.title}</div>
+        <div class="xai-ev-desc">${e.desc}</div>
+        ${e.chain?`<div class="xai-ev-chain">${e.chain}</div>`:''}
+      </div>
+    </div>`).join('');
+}
+
+// ─────────────────────────────────────────────
+// XAI NETWORK
+// ─────────────────────────────────────────────
+const NODES=[
+  {id:'smoking',  lbl:{tr:'Sigara',     en:'Smoking'},    layer:'input'},
+  {id:'activity', lbl:{tr:'Egzersiz',   en:'Exercise'},   layer:'input'},
+  {id:'stress',   lbl:{tr:'Stres',      en:'Stress'},     layer:'input'},
+  {id:'alcohol',  lbl:{tr:'Alkol',      en:'Alcohol'},    layer:'input'},
+  {id:'sleep',    lbl:{tr:'Uyku',       en:'Sleep'},      layer:'input'},
+  {id:'bmi',      lbl:{tr:'BMI',        en:'BMI'},        layer:'input'},
+  {id:'age',      lbl:{tr:'Yaş',        en:'Age'},        layer:'input'},
+  {id:'diet',     lbl:{tr:'Beslenme',   en:'Diet'},       layer:'input'},
+  {id:'meds',     lbl:{tr:'İlaçlar',    en:'Medications'},layer:'input'},
+  {id:'family',   lbl:{tr:'Aile Hx',   en:'Family Hx'},  layer:'input'},
+  {id:'mood',     lbl:{tr:'Ruh Hali',   en:'Mood'},       layer:'input'},
+  {id:'social',   lbl:{tr:'Sosyal',     en:'Social'},     layer:'input'},
+  {id:'glucose',  lbl:{tr:'Kan Şekeri', en:'Blood Sugar'},layer:'input'},
+  {id:'inflam',   lbl:{tr:'İnflamasyon',en:'Inflammation'},layer:'mechanism'},
+  {id:'insulin',  lbl:{tr:'İnsülin Dir.',en:'Insulin Res.'},layer:'mechanism'},
+  {id:'cortisol', lbl:{tr:'Kortizol ↑', en:'Cortisol ↑'}, layer:'mechanism'},
+  {id:'endo',     lbl:{tr:'Endotel Has.',en:'Endothelial'},layer:'mechanism'},
+  {id:'bp_m',     lbl:{tr:'Kan Bas. ↑', en:'BP ↑'},       layer:'mechanism'},
+  {id:'lipid',    lbl:{tr:'Lipid Denge',en:'Lipid Balance'},layer:'mechanism'},
+  {id:'immune',   lbl:{tr:'Bağışıklık', en:'Immunity'},   layer:'mechanism'},
+  {id:'hpa',      lbl:{tr:'HPA Ekseni', en:'HPA Axis'},   layer:'mechanism'},
+  {id:'cv_out',   lbl:{tr:'KV Risk',    en:'CV Risk'},    layer:'output',out:'danger'},
+  {id:'met_out',  lbl:{tr:'Diyabet Riski',en:'Diabetes Risk'},layer:'output',out:'danger'},
+  {id:'gen_out',  lbl:{tr:'Genel İyilik',en:'Gen. Wellness'},layer:'output',out:'good'},
+  {id:'imm_out',  lbl:{tr:'Bağışıklık', en:'Immunity'},   layer:'output',out:'good'},
+];
+
+const EDGES=[
+  {s:'smoking',  t:'inflam',  w:.9},{s:'smoking',t:'endo',w:.85},{s:'smoking',t:'bp_m',w:.6},{s:'smoking',t:'lipid',w:.5},
+  {s:'activity', t:'insulin', w:-.8},{s:'activity',t:'inflam',w:-.6},{s:'activity',t:'bp_m',w:-.55},{s:'activity',t:'lipid',w:-.5},{s:'activity',t:'immune',w:-.4},
+  {s:'stress',   t:'cortisol',w:.9},{s:'stress',t:'inflam',w:.55},{s:'stress',t:'immune',w:.6},{s:'stress',t:'hpa',w:.85},
+  {s:'alcohol',  t:'lipid',   w:.7},{s:'alcohol',t:'inflam',w:.55},{s:'alcohol',t:'immune',w:.45},
+  {s:'sleep',    t:'cortisol',w:-.6},{s:'sleep',t:'immune',w:-.55},{s:'sleep',t:'hpa',w:-.5},
+  {s:'bmi',      t:'insulin', w:.85},{s:'bmi',t:'inflam',w:.65},{s:'bmi',t:'bp_m',w:.55},
+  {s:'age',      t:'endo',    w:.5},{s:'age',t:'inflam',w:.45},{s:'age',t:'immune',w:.4},
+  {s:'diet',     t:'inflam',  w:-.7},{s:'diet',t:'insulin',w:-.6},{s:'diet',t:'lipid',w:-.65},{s:'diet',t:'immune',w:-.5},
+  {s:'meds',     t:'bp_m',    w:-.65},{s:'meds',t:'lipid',w:-.55},{s:'meds',t:'insulin',w:-.45},{s:'meds',t:'cortisol',w:-.2},
+  {s:'family',   t:'inflam',  w:.4},{s:'family',t:'insulin',w:.4},{s:'family',t:'endo',w:.3},
+  {s:'mood',     t:'cortisol',w:.65},{s:'mood',t:'immune',w:.45},{s:'mood',t:'hpa',w:.6},
+  {s:'social',   t:'cortisol',w:-.5},{s:'social',t:'immune',w:-.45},{s:'social',t:'hpa',w:-.4},
+  {s:'glucose',  t:'insulin', w:.85},{s:'glucose',t:'inflam',w:.6},{s:'glucose',t:'endo',w:.5},
+  // mechanisms → outputs
+  {s:'inflam',   t:'cv_out',  w:.9},{s:'endo',t:'cv_out',w:.85},{s:'bp_m',t:'cv_out',w:.75},{s:'lipid',t:'cv_out',w:.65},{s:'insulin',t:'cv_out',w:.5},
+  {s:'insulin',  t:'met_out', w:.9},{s:'inflam',t:'met_out',w:.6},{s:'cortisol',t:'met_out',w:.55},{s:'lipid',t:'met_out',w:.5},
+  {s:'cortisol', t:'gen_out', w:-.7},{s:'immune',t:'gen_out',w:-.55},{s:'hpa',t:'gen_out',w:-.65},
+  {s:'immune',   t:'imm_out', w:.9},{s:'hpa',t:'imm_out',w:-.6},
+];
+
+function initNetwork(){
+  const svg=document.getElementById('networkSvg');
+  svg.innerHTML='';
+  const W=svg.clientWidth||860, H=520;
+  svg.setAttribute('viewBox',`0 0 ${W} ${H}`);
+
+  const byLayer={input:[],mechanism:[],output:[]};
+  NODES.forEach(n=>byLayer[n.layer].push(n));
+  const LX={input:W*.1,mechanism:W*.5,output:W*.9};
+  Object.keys(byLayer).forEach(l=>{
+    const ns=byLayer[l];const cnt=ns.length;
+    ns.forEach((n,i)=>{n.cx=LX[l];n.cy=(H/(cnt+1))*(i+1);});
+  });
+
+  const d3svg=d3.select('#networkSvg');
+  const defs=d3svg.append('defs');
+  [{id:'ap',c:'#ef4444'},{id:'an',c:'#10b981'},{id:'ag',c:'#cbd5e1'}].forEach(a=>{
+    defs.append('marker').attr('id',a.id).attr('markerWidth',7).attr('markerHeight',5)
+      .attr('refX',7).attr('refY',2.5).attr('orient','auto')
+      .append('polygon').attr('points','0 0,7 2.5,0 5').attr('fill',a.c).attr('opacity',.75);
+  });
+
+  const eG=d3svg.append('g').attr('class','edges');
+  EDGES.forEach(e=>{
+    const src=NODES.find(n=>n.id===e.s),tgt=NODES.find(n=>n.id===e.t);
+    if(!src||!tgt)return;
+    const pos=e.w>0;
+    const mx=(src.cx+tgt.cx)/2;
+    eG.append('path')
+      .attr('class',`edge esrc-${e.s} etgt-${e.t}`)
+      .attr('d',`M${src.cx},${src.cy} C${mx},${src.cy} ${mx},${tgt.cy} ${tgt.cx},${tgt.cy}`)
+      .attr('fill','none').attr('stroke',pos?'#ef4444':'#10b981')
+      .attr('stroke-width',Math.abs(e.w)*2.8).attr('stroke-opacity',.2)
+      .attr('marker-end',pos?'url(#ap)':'url(#an)')
+      .attr('data-s',e.s).attr('data-t',e.t).attr('data-w',e.w);
+  });
+
+  const nG=d3svg.append('g').attr('class','nodes');
+  const tooltip=document.getElementById('netTooltip');
+
+  NODES.forEach(n=>{
+    const color=n.layer==='input'?'#0ea5c9':n.layer==='mechanism'?'#f59e0b':n.out==='good'?'#10b981':'#ef4444';
+    const r=n.layer==='mechanism'?30:n.layer==='output'?26:22;
+    const g=nG.append('g').attr('class',`node nlayer-${n.layer}`).attr('data-id',n.id)
+      .attr('transform',`translate(${n.cx},${n.cy})`).style('cursor','pointer');
+    g.append('circle').attr('r',r).attr('fill',color).attr('fill-opacity',.15)
+      .attr('stroke',color).attr('stroke-width',2);
+    const lbl=n.lbl[lang];const words=lbl.split(' ');
+    if(words.length===1){
+      g.append('text').text(lbl).attr('text-anchor','middle').attr('dy','.35em')
+        .attr('font-size','10px').attr('fill',color).attr('font-weight','700').attr('font-family','Nunito');
+    }else{
+      const t=g.append('text').attr('text-anchor','middle').attr('font-size','9.5px').attr('fill',color).attr('font-weight','700').attr('font-family','Nunito');
+      words.forEach((w,wi)=>t.append('tspan').text(w).attr('x',0).attr('dy',wi===0?'-.4em':'1.15em'));
+    }
+    g.on('mouseenter',function(ev){
+      tooltip.innerHTML=`<strong>${n.lbl[lang]}</strong>${nodeUserDesc(n)}`;
+      tooltip.style.opacity='1';
+    }).on('mousemove',function(ev){
+      tooltip.style.left=(ev.clientX+14)+'px';tooltip.style.top=(ev.clientY-10)+'px';
+    }).on('mouseleave',()=>tooltip.style.opacity='0')
+     .on('click',()=>selectNode(n.id));
+  });
+
+  // Highlight high-risk inputs based on user data
+  if(currentData){
+    const r=currentData.raw;
+    const hi=[];
+    if(parseFloat(r.smoking)>.5)hi.push('smoking');
+    if(parseFloat(r.activity)<.4)hi.push('activity');
+    if(parseFloat(r.stress)>.5)hi.push('stress');
+    if(parseFloat(r.alcohol)>.4)hi.push('alcohol');
+    if(r.glucose==='diabetes'||r.glucose==='prediabetes')hi.push('glucose');
+    hi.forEach(id=>d3.selectAll(`.node[data-id="${id}"] circle`).attr('fill-opacity',.38).attr('stroke-width',3.5));
+  }
+}
+
+function nodeUserDesc(n){
+  if(!currentData)return'';
+  const r=currentData.raw;
+  const m={
+    smoking:`${T('Sigara','Smoking')}: ${[['0','Yok/None'],['0.4','Bıraktım/Former'],['0.7','Hafif/Light'],['1','Yoğun/Heavy']].find(([v])=>v==r.smoking)?.[1]?.split('/')[lang==='tr'?0:1]||'—'}`,
+    activity:`${T('Aktivite','Activity')}: ${[['0','Hareketsiz/Sedentary'],['0.4','Hafif/Light'],['0.7','Orta/Moderate'],['1','Aktif/Active']].find(([v])=>v==r.activity)?.[1]?.split('/')[lang==='tr'?0:1]||'—'}`,
+    bmi:`BMI: ${currentData.bmi}`,age:`${T('Yaş','Age')}: ${r.age}`,
+    cv_out:`${T('KV Skoru','CV Score')}: ${currentData.cvScore}`,
+    met_out:`${T('Metabolik','Metabolic')}: ${currentData.metScore}`,
+    gen_out:`${T('Genel','General')}: ${currentData.genScore}`,
+  };
+  const d=m[n.id];return d?`<br><span style="opacity:.72">${d}</span>`:'';
+}
+
+function selectNode(nodeId){
+  d3.selectAll('.edge').attr('stroke-opacity',.05);
+  d3.selectAll('.node circle').attr('fill-opacity',.07).attr('stroke-opacity',.15);
+  const conn=new Set([nodeId]);
+  const traceF=id=>{EDGES.filter(e=>e.s===id).forEach(e=>{if(!conn.has(e.t)){conn.add(e.t);traceF(e.t);}});};
+  const traceB=id=>{EDGES.filter(e=>e.t===id).forEach(e=>{if(!conn.has(e.s)){conn.add(e.s);traceB(e.s);}});};
+  traceF(nodeId);traceB(nodeId);
+  conn.forEach(id=>{
+    d3.selectAll(`.node[data-id="${id}"] circle`).attr('fill-opacity',.32).attr('stroke-opacity',1).attr('stroke-width',3);
+  });
+  EDGES.forEach(e=>{
+    if(conn.has(e.s)&&conn.has(e.t)){
+      d3.selectAll(`.esrc-${e.s}.etgt-${e.t}`).attr('stroke-opacity',e.w>0?.72:.68);
+    }
+  });
+  // path chain
+  const inp=[...conn].filter(id=>NODES.find(n=>n.id===id)?.layer==='input');
+  const mch=[...conn].filter(id=>NODES.find(n=>n.id===id)?.layer==='mechanism');
+  const out=[...conn].filter(id=>NODES.find(n=>n.id===id)?.layer==='output');
+  const nodeSpan=(id,cls)=>{const n=NODES.find(x=>x.id===id);return n?`<span class="pnode ${cls}">${n.lbl[lang]}</span>`:'';}
+  const arr='<span class="parr">→</span>';
+  let chain=inp.map(id=>nodeSpan(id,'inp')).join(arr)+
+    (mch.length?(arr+mch.map(id=>nodeSpan(id,'mid')).join(arr)):'') +
+    (out.length?(arr+out.map(id=>{const n=NODES.find(x=>x.id===id);return nodeSpan(id,n?.out==='good'?'good':'out');}).join(arr)):'');
+  document.getElementById('pathChain').innerHTML=chain||`<span class="path-empty">${T('Yol bulunamadı','No path found')}</span>`;
+}
+
+function filterLayer(layer,btn){
+  document.querySelectorAll('.net-layer-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  if(layer==='all'){d3.selectAll('.node,.edge').style('display','block');}
+  else if(layer==='input'){
+    d3.selectAll('.node').style('display',function(){return this.classList.contains('nlayer-input')?'block':'none';});
+    d3.selectAll('.edge').style('display','none');
+  }else if(layer==='mechanism'){
+    d3.selectAll('.node').style('display',function(){return this.classList.contains('nlayer-input')||this.classList.contains('nlayer-mechanism')?'block':'none';});
+    d3.selectAll('.edge').style('display',function(){const s=this.getAttribute('data-s'),t=this.getAttribute('data-t');
+      const sn=NODES.find(n=>n.id===s),tn=NODES.find(n=>n.id===t);
+      return(sn?.layer==='input'&&tn?.layer==='mechanism')?'block':'none';});
+  }else{
+    d3.selectAll('.node').style('display','block');
+    d3.selectAll('.edge').style('display',function(){const t=this.getAttribute('data-t');const tn=NODES.find(n=>n.id===t);return tn?.layer==='output'?'block':'none';});
+  }
+}
+
+// ─────────────────────────────────────────────
+// NAVIGATION
+// ─────────────────────────────────────────────
+function showPage(id){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0,0);
+}
+
+
+// ── REFERENCES MODAL ─────────────────────────────────────────────────────────
+const REFS = {
+  tr: {
+    title: '📚 Bilimsel Kaynaklar',
+    sections: [
+      {
+        title: 'XAI — Açıklanabilir Yapay Zeka Yöntemleri',
+        items: [
+          {
+            cite: 'Lundberg, S. M. & Lee, S.-I. (2017). A unified approach to interpreting model predictions. <em>Advances in Neural Information Processing Systems, 30</em>, 4765–4774.',
+            note: 'SHAP (SHapley Additive exPlanations) yönteminin temel makalesi. Uygulamadaki faktör katkı barlarının matematiksel temeli.'
+          },
+          {
+            cite: 'Ribeiro, M. T., Singh, S. & Guestrin, C. (2016). "Why Should I Trust You?": Explaining the predictions of any classifier. <em>Proceedings of the 22nd ACM SIGKDD International Conference on Knowledge Discovery and Data Mining</em>, 1135–1144. https://doi.org/10.1145/2939672.2939778',
+            note: 'LIME (Local Interpretable Model-Agnostic Explanations) yönteminin orijinal makalesi. Counterfactual simülasyon sayfasının kavramsal dayanağı.'
+          },
+          {
+            cite: 'Bharati, S., Mondal, M. R. H. & Podder, P. (2023). A review on explainable artificial intelligence for healthcare: Why, how, and when? <em>IEEE Access</em>. https://doi.org/10.48550/arXiv.2304.04780',
+            note: 'Sağlık alanında XAI kullanımının sistematik incelemesi.'
+          },
+        ]
+      },
+      {
+        title: 'Dijital İkiz & Sağlık Simülasyonu',
+        items: [
+          {
+            cite: 'Thangaraj, P. M., Benson, S. H., Oikonomou, E. K., Asselbergs, F. W. & Khera, R. (2024). Cardiovascular care with digital twin technology in the era of generative artificial intelligence. <em>European Heart Journal, 45</em>(45), 4808–4821. https://doi.org/10.1093/eurheartj/ehae619',
+            note: 'Kardiyovasküler tıpta dijital ikiz teknolojisinin kapsamlı incelemesi.'
+          },
+          {
+            cite: 'Sel, K., et al. (2024). Building digital twins for cardiovascular health: From principles to clinical impact. <em>Journal of the American Heart Association, 13</em>(19), e031981. https://doi.org/10.1161/JAHA.123.031981',
+            note: 'Dijital ikizlerin klinik kardiyovasküler uygulamalarının prensiplerini inceleyen temel çalışma.'
+          },
+        ]
+      },
+      {
+        title: 'Kardiyovasküler Risk — Klinik & Epidemiyolojik Temeller',
+        items: [
+          {
+            cite: 'Estruch, R., Ros, E., Salas-Salvadó, J., et al. (2018). Primary prevention of cardiovascular disease with a Mediterranean diet supplemented with extra-virgin olive oil or nuts. <em>New England Journal of Medicine, 378</em>(25), e34. https://doi.org/10.1056/NEJMoa1800389',
+            note: 'PREDIMED çalışması: Akdeniz diyetinin KV risk azaltıcı etkisinin güçlü kanıtı. Beslenme kalitesi faktörünün bilimsel dayanağı.'
+          },
+          {
+            cite: 'Messner, B. & Bernhard, D. (2014). Smoking and cardiovascular disease: Mechanisms of endothelial dysfunction and early atherogenesis. <em>Arteriosclerosis, Thrombosis, and Vascular Biology, 34</em>(3), 509–515. https://doi.org/10.1161/ATVBAHA.113.300156',
+            note: 'Sigara → endotel hasarı → ateroskleroz mekanizma zincirinin temel referansı.'
+          },
+          {
+            cite: 'Masmoum, M. D., et al. (2024). The effectiveness of exercise in reducing cardiovascular risk factors among adults: A systematic review and meta-analysis. <em>Cureus, 16</em>(9), e68928. https://doi.org/10.7759/cureus.68928',
+            note: 'Egzersizin KV risk faktörleri üzerindeki etkisinin meta-analizi. Fiziksel aktivite faktörünün kanıt tabanı.'
+          },
+        ]
+      },
+      {
+        title: 'Stres, Kortizol & Metabolik Sağlık',
+        items: [
+          {
+            cite: 'Steptoe, A. & Kivimäki, M. (2013). Stress and cardiovascular disease: An update on current knowledge. <em>Annual Review of Public Health, 34</em>, 337–354. https://doi.org/10.1146/annurev-publhealth-031912-114452',
+            note: 'HPA ekseni aktivasyonu ve kardiyometabolik sonuçlar arasındaki ilişkinin kapsamlı incelemesi. Stres faktörünün bilimsel dayanağı.'
+          },
+          {
+            cite: 'Holt-Lunstad, J., Smith, T. B., Baker, M., Harris, T. & Stephenson, D. (2015). Loneliness and social isolation as risk factors for mortality: A meta-analytic review. <em>Perspectives on Psychological Science, 10</em>(2), 227–237. https://doi.org/10.1177/1745691614568352',
+            note: 'Sosyal izolasyonun mortalite riskini %29 artırdığını gösteren meta-analiz. Sosyal bağlantı faktörünün kanıt dayanağı.'
+          },
+        ]
+      },
+      {
+        title: 'Uygulama Hakkında',
+        items: [
+          {
+            cite: 'Bu uygulama <strong>Prof. Dr. Utku Köse</strong> tarafından geliştirilmiştir.<br>Süleyman Demirel Üniversitesi, Türkiye &nbsp;·&nbsp; Kuzey Dakota Üniversitesi, ABD &nbsp;·&nbsp; VelTech Üniversitesi, Hindistan &nbsp;·&nbsp; Universidad Panamericana, Meksika<br><a href="mailto:utkukose@sdu.edu.tr">utkukose@sdu.edu.tr</a> &nbsp;·&nbsp; <a href="mailto:utkukose@gmail.com">utkukose@gmail.com</a> &nbsp;·&nbsp; <a href="https://www.utkukose.com" target="_blank">www.utkukose.com</a>',
+            note: 'Risk skorları gerçek tıbbi tanı aracı değildir; yalnızca eğitim amaçlı simülasyondur. Klinik karar için bir sağlık profesyoneline danışınız.'
+          }
+        ]
+      }
+    ]
+  },
+  en: {
+    title: '📚 Scientific References',
+    sections: [
+      {
+        title: 'XAI — Explainable AI Methods',
+        items: [
+          {
+            cite: 'Lundberg, S. M. & Lee, S.-I. (2017). A unified approach to interpreting model predictions. <em>Advances in Neural Information Processing Systems, 30</em>, 4765–4774.',
+            note: 'The foundational SHAP paper. Mathematical basis for the factor contribution bars in this application.'
+          },
+          {
+            cite: 'Ribeiro, M. T., Singh, S. & Guestrin, C. (2016). "Why Should I Trust You?": Explaining the predictions of any classifier. <em>Proceedings of the 22nd ACM SIGKDD International Conference on Knowledge Discovery and Data Mining</em>, 1135–1144. https://doi.org/10.1145/2939672.2939778',
+            note: 'Original LIME paper. Conceptual basis for the counterfactual simulation feature.'
+          },
+          {
+            cite: 'Bharati, S., Mondal, M. R. H. & Podder, P. (2023). A review on explainable artificial intelligence for healthcare: Why, how, and when? <em>IEEE Access</em>. https://doi.org/10.48550/arXiv.2304.04780',
+            note: 'Systematic review of XAI applications in healthcare.'
+          },
+        ]
+      },
+      {
+        title: 'Digital Twin & Health Simulation',
+        items: [
+          {
+            cite: 'Thangaraj, P. M., Benson, S. H., Oikonomou, E. K., Asselbergs, F. W. & Khera, R. (2024). Cardiovascular care with digital twin technology in the era of generative artificial intelligence. <em>European Heart Journal, 45</em>(45), 4808–4821. https://doi.org/10.1093/eurheartj/ehae619',
+            note: 'Comprehensive review of digital twin technology in cardiovascular medicine.'
+          },
+          {
+            cite: 'Sel, K., et al. (2024). Building digital twins for cardiovascular health: From principles to clinical impact. <em>Journal of the American Heart Association, 13</em>(19), e031981. https://doi.org/10.1161/JAHA.123.031981',
+            note: 'Foundational study on principles of digital twins in clinical cardiovascular applications.'
+          },
+        ]
+      },
+      {
+        title: 'Cardiovascular Risk — Clinical & Epidemiological Foundations',
+        items: [
+          {
+            cite: 'Estruch, R., Ros, E., Salas-Salvadó, J., et al. (2018). Primary prevention of cardiovascular disease with a Mediterranean diet supplemented with extra-virgin olive oil or nuts. <em>New England Journal of Medicine, 378</em>(25), e34. https://doi.org/10.1056/NEJMoa1800389',
+            note: 'PREDIMED trial: strong evidence for Mediterranean diet reducing CV risk. Scientific basis for the diet quality factor.'
+          },
+          {
+            cite: 'Messner, B. & Bernhard, D. (2014). Smoking and cardiovascular disease: Mechanisms of endothelial dysfunction and early atherogenesis. <em>Arteriosclerosis, Thrombosis, and Vascular Biology, 34</em>(3), 509–515. https://doi.org/10.1161/ATVBAHA.113.300156',
+            note: 'Primary reference for the smoking → endothelial damage → atherosclerosis mechanism chain.'
+          },
+          {
+            cite: 'Masmoum, M. D., et al. (2024). The effectiveness of exercise in reducing cardiovascular risk factors among adults: A systematic review and meta-analysis. <em>Cureus, 16</em>(9), e68928. https://doi.org/10.7759/cureus.68928',
+            note: 'Meta-analysis of exercise effects on CV risk factors. Evidence base for the physical activity factor.'
+          },
+        ]
+      },
+      {
+        title: 'Stress, Cortisol & Metabolic Health',
+        items: [
+          {
+            cite: 'Steptoe, A. & Kivimäki, M. (2013). Stress and cardiovascular disease: An update on current knowledge. <em>Annual Review of Public Health, 34</em>, 337–354. https://doi.org/10.1146/annurev-publhealth-031912-114452',
+            note: 'Comprehensive review of HPA axis activation and cardiometabolic outcomes. Scientific basis for the stress factor.'
+          },
+          {
+            cite: 'Holt-Lunstad, J., Smith, T. B., Baker, M., Harris, T. & Stephenson, D. (2015). Loneliness and social isolation as risk factors for mortality: A meta-analytic review. <em>Perspectives on Psychological Science, 10</em>(2), 227–237. https://doi.org/10.1177/1745691614568352',
+            note: 'Meta-analysis showing social isolation increases mortality risk by 29%. Evidence basis for the social connection factor.'
+          },
+        ]
+      },
+      {
+        title: 'About This Application',
+        items: [
+          {
+            cite: 'This application was developed by <strong>Prof. Dr. Utku Köse</strong>.<br>Süleyman Demirel University, Turkey &nbsp;·&nbsp; University of North Dakota, USA &nbsp;·&nbsp; VelTech University, India &nbsp;·&nbsp; Universidad Panamericana, Mexico<br><a href="mailto:utkukose@sdu.edu.tr">utkukose@sdu.edu.tr</a> &nbsp;·&nbsp; <a href="mailto:utkukose@gmail.com">utkukose@gmail.com</a> &nbsp;·&nbsp; <a href="https://www.utkukose.com" target="_blank">www.utkukose.com</a>',
+            note: 'Risk scores are not real medical diagnostic tools; for educational simulation purposes only. Please consult a healthcare professional for clinical decisions.'
+          }
+        ]
+      }
+    ]
+  }
+};
+
+function openRefModal(){
+  const r=REFS[lang];
+  document.getElementById('refModalTitle').textContent=r.title;
+  document.getElementById('refModalBody').innerHTML=r.sections.map(s=>`
+    <div class="ref-section">
+      <div class="ref-section-title">${s.title}</div>
+      ${s.items.map(item=>`
+        <div class="ref-item">
+          <div>${item.cite}</div>
+          <div class="ref-note">${item.note}</div>
+        </div>`).join('')}
+    </div>`).join('');
+  document.getElementById('refModalOverlay').classList.add('open');
+  document.body.style.overflow='hidden';
+}
+
+function closeRefModal(){
+  document.getElementById('refModalOverlay').classList.remove('open');
+  document.body.style.overflow='';
+}
+
+</script>
+</body>
+</html>
