@@ -194,14 +194,14 @@ python3 -c "import secrets; print(secrets.token_hex(32))"
 ### Run
 
 ```bash
-# Development
+# Local development
 uvicorn main:app --host 127.0.0.1 --port 8080 --reload
 
-# Production / seminar
-uvicorn main:app --host 0.0.0.0 --port 8080
+# Server / seminar
+uvicorn main:app --host SERVER_IP --port 8080
 
-# Background (server)
-nohup uvicorn main:app --host 0.0.0.0 --port 8080 > server.log 2>&1 &
+# Server — run in background (persistent)
+nohup uvicorn main:app --host SERVER_IP --port 8080 > server.log 2>&1 &
 ```
 
 ### Access
