@@ -1,0 +1,5 @@
+.env
+data/participants.json
+__pycache__/
+*.pyc
+venv/
