@@ -208,15 +208,8 @@ nohup uvicorn main:app --host 0.0.0.0 --port 8080 > server.log 2>&1 &
 
 | URL | Description |
 |---|---|
-| `http://localhost:8080` | Participant form |
-| `http://localhost:8080/admin` | Admin dashboard (login required) |
-
-### QR Code for Seminar
-
-```bash
-pip install qrcode pillow
-python3 -c "import qrcode; qrcode.make('http://YOUR_IP:8080/').save('qr.png')"
-```
+| `http://SERVER_IP:8080` | Participant form |
+| `http://SERVER_IP:8080/admin` | Admin dashboard (login required) |
 
 ---
 
